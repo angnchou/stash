@@ -1,0 +1,37 @@
+#add {
+  border: 1px solid black;
+  margin: 10px;
+}
+
+#bookmark {
+  margin: 5px;
+}
+
+#list {
+  margin: 5px;
+  border: 1px solid black;
+}
+
+/* #modal {
+  position: absolute;
+  top: 45px;
+  left: 50%;
+  background-color: rgb(72, 72, 72);
+  box-sizing: border-box;
+  padding: 32px;
+  transform: translate(-50%, 0);
+  width: 568px;
+  margin-bottom: 50px;
+}
+
+.modalBackground {
+  position: fixed;
+  z-index: 2000;
+  top: 0px;
+  right: 0px;
+  bottom: 0px;
+  left: 0px;
+  overflow-y: auto;
+  background: rgba(0, 0, 0, 0.25);
+  overflow-y: auto;
+} */
