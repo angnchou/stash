@@ -35,7 +35,7 @@ app.post('/items', function(req, res) {
     (err, data) => {
       if (err) {
         console.log(err);
-        res.sendStatus(500);
+        res.status(500).send(err);
       } else {
         db.selectAll((err, data) => {
           if (err) {
@@ -47,6 +47,22 @@ app.post('/items', function(req, res) {
       }
     },
   );
+});
+
+app.delete('/items/delete/:id', (err, req) => {
+  db.deleteBookmark(req.params.id, (err, data) => {
+    if (err) {
+      res.status(500).send(err);
+    } else {
+      db.selectAll((err, data) => {
+        if (err) {
+          res.status(500).send(err);
+        } else {
+          res.json(data);
+        }
+      });
+    }
+  });
 });
 
 app.listen(3000, function() {

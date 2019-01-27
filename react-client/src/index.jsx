@@ -17,12 +17,16 @@ class App extends React.Component {
       url: '',
       notes: '',
       tags: '',
+      selected: null,
     };
     this.openModal = this.openModal.bind(this);
     this.afterOpenModal = this.afterOpenModal.bind(this);
     this.closeModal = this.closeModal.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.handleAdd = this.handleAdd.bind(this);
+    this.handleSelect = this.handleSelect.bind(this);
+    this.handleDelete = this.handleDelete.bind(this);
+    this.handleEdit = this.handleEdit.bind(this);
   }
 
   componentDidMount() {
@@ -82,6 +86,46 @@ class App extends React.Component {
     this.closeModal();
   }
 
+  //change status to either delete or edit
+  //delete is done in the back end
+  handleSelect(bookmark) {
+    this.setState({
+      selected: bookmark,
+    });
+  }
+
+  handleDelete(bookmark) {
+    $.ajax({
+      method: 'DELETE',
+      url: '/items/delete/' + `${bookmark.id}`,
+      success: data => {
+        this.setState({
+          items: data,
+        });
+      },
+    });
+  }
+
+  handleEdit(bookmark) {
+    this.setState({
+      title: bookmark.title,
+      category: bookmark.category,
+      url: bookmark.url,
+      notes: bookmark.notes,
+      tags: bookmark.tags,
+    });
+    $.ajax({
+      method: 'PATCH',
+      url: '/items/edit/' + `${bookmark.id}`,
+      data: BookmarkModal,
+      success: (err, data) => {
+        this.setState({
+          items: data,
+        });
+      },
+    });
+  }
+
   render() {
     return (
       <div>
@@ -103,15 +147,27 @@ class App extends React.Component {
           ) : null} */}
         {/* </div> */}
         <button onClick={this.openModal}>Open Modal</button>
-        <BookmarkModal
-          modalIsOpen={this.state.modalIsOpen}
-          onAfterOpen={this.afterOpenModal}
-          closeModal={this.closeModal}
-          handleAdd={this.handleAdd}
-        />
+        <div>
+          {this.state.selected === null ? null : (
+            <BookmarkModal
+              modalIsOpen={this.state.modalIsOpen}
+              onAfterOpen={this.afterOpenModal}
+              closeModal={this.closeModal}
+              handleAdd={this.handleAdd}
+              selected={this.state.selected}
+              handleDelete={this.handleDelete}
+              handleEdit={this.handleEdit}
+            />
+          )}
+        </div>
+
         <h1>Item List</h1>
 
-        <List items={this.state.items} />
+        <List
+          openModal={this.openModal}
+          handleSelect={this.handleSelect}
+          items={this.state.items}
+        />
       </div>
     );
   }

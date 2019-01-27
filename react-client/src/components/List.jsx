@@ -6,7 +6,12 @@ const List = props => (
     <h4> List Component </h4>
     There are {props.items.length} bookmarks.
     {props.items.map((item, index) => (
-      <ListItem key={index} item={item} />
+      <ListItem
+        openModal={props.openModal}
+        handleSelect={props.handleSelect}
+        key={index}
+        item={item}
+      />
     ))}
   </div>
 );

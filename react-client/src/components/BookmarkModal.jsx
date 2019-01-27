@@ -1,5 +1,6 @@
 import React from 'react';
 import Modal from 'react-modal';
+import ActionBar from './ActionBar.jsx';
 
 Modal.setAppElement(document.getElementById('app'));
 
@@ -24,6 +25,11 @@ const BookmarkModal = props => {
       {/* <h2 ref={subtitle => (this.subtitle = subtitle)}>Hello</h2> */}
       <button onClick={props.closeModal}>close</button>
       <div>I am a modal</div>
+      <ActionBar
+        selected={props.selected}
+        handleDelete={props.handleDelete}
+        handleEdit={props.handleEdit}
+      />
       {/* <form>
         <input />
         <button>tab navigation</button>

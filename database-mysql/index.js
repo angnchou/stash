@@ -24,7 +24,19 @@ const add = (title, tags, category, url, notes, cb) => {
       if (err) {
         cb(err, null);
       } else {
-        console.log(result, 'RESULT');
+        cb(null, result);
+      }
+    },
+  );
+};
+
+const deleteBookmark = (id, cb) => {
+  connection.query(
+    `DELETE bookmarks WHERE id=${req.params.id})`,
+    (err, result) => {
+      if (err) {
+        cb(err, null);
+      } else {
         cb(null, result);
       }
     },
@@ -34,4 +46,5 @@ const add = (title, tags, category, url, notes, cb) => {
 module.exports = {
   selectAll,
   add,
+  deleteBookmark,
 };
