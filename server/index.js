@@ -46,6 +46,8 @@ app.post('/items/api', function(req, res) {
       // res.status(200).send(info);
     })
     .catch(err => {
+      console.log(err, 'ERR');
+
       res.status(500).send(err);
     });
 });

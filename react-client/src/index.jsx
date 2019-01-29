@@ -161,7 +161,12 @@ class App extends React.Component {
   render() {
     return (
       <div>
-        <button onClick={this.openModal}>Open Modal</button>
+        <img
+          id="plus"
+          src="https://png.pngtree.com/svg/20170315/plus_grey_880693.png"
+          onClick={this.openModal}
+        />
+        {/* <button >Open Modal</button> */}
         <BookmarkModal
           saveOrUpdate={this.saveOrUpdate}
           handleChange={this.handleChange}

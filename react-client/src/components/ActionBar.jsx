@@ -4,7 +4,7 @@ const ActionBar = props => {
     <div>
       <div>
         <button onClick={props.saveOrUpdate}>
-          {props.selectedId ? 'Edit' : 'Save'}
+          {props.selectedId ? 'Update' : 'Save'}
         </button>
       </div>
       <div>

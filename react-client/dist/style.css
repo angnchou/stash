@@ -1,9 +1,27 @@
 body {
-  font: helvetica;
+  margin: 32px;
+  padding: 16px;
+  font-family: circular, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  color: #484848;
+  display: flex;
+  align-content: flex-start;
 }
 
 h2 {
   color: #ebd735;
+}
+
+#category {
+  display: flex;
+
+  flex-direction: column;
+}
+#edit {
+  max-width: 16px;
+  max-height: 16px;
+  flex-direction: row;
+  cursor: pointer;
 }
 
 #add {
@@ -11,14 +29,34 @@ h2 {
   margin: 10px;
 }
 
-#bookmark {
-  margin: 16px;
-  background-color: lightgray;
+#plus {
+  max-width: 16px;
+}
+
+#close {
+  max-width: 16px;
 }
 
 #list {
-  margin: 5px;
-  border: 1px solid black;
+  flex-direction: row;
+}
+
+#bookmark {
+  margin: 16px;
+  width: 40%
+  /* background-color: rgba(0, 0, 0, 0.25); */
+
+  flex-direction: column;
+}
+#bookmarkInner {
+  flex-direction: row;
+  margin: 8px;
+  align-content: flex-start;
+}
+
+#list {
+  margin: 8px;
+  border: 1px solid #e4e4e4;
 }
 
 /* #modal {

@@ -12,8 +12,6 @@ module.exports = {
       .then(result => {
         return {
           title: result.data.title,
-          image: result.data['objects'][0]['images'],
-          url: result.request.pageUrl,
         };
       }),
 };
