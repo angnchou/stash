@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import $ from 'jquery';
 import List from './components/List.jsx';
 import BookmarkModal from './components/bookmarkModal.jsx';
-// import Dropdown from './components/Dropdown.jsx';
+import Dropdown from './components/Dropdown.jsx';
 
 const axios = require('axios');
 
@@ -19,7 +19,7 @@ class App extends React.Component {
       notes: '',
       tags: '',
       selectedId: null,
-      currentCategory: null,
+      currentCategory: 'Show All',
     };
     this.openModal = this.openModal.bind(this);
     this.afterOpenModal = this.afterOpenModal.bind(this);
@@ -30,6 +30,7 @@ class App extends React.Component {
     this.handleEdit = this.handleEdit.bind(this);
     this.clearForm = this.clearForm.bind(this);
     this.saveOrUpdate = this.saveOrUpdate.bind(this);
+    this.selectCategory = this.selectCategory.bind(this);
   }
 
   clearForm() {
@@ -121,9 +122,11 @@ class App extends React.Component {
     });
   }
 
-  renderCategory(cat) {
+  selectCategory(event) {
+    console.log(typeof event.target.value);
+    console.log(event.target.value);
     this.setState({
-      currentCategory: cat,
+      currentCategory: event.target.value,
     });
   }
 
@@ -190,8 +193,16 @@ class App extends React.Component {
           tags={this.state.tags}
         />
         <h2>Stash</h2>
-        {/* <Dropdown items={this.state.items} /> */}
-        <List items={this.state.items} handleEdit={this.handleEdit} />
+        <Dropdown
+          items={this.state.items}
+          currentCat={this.state.currentCategory}
+          selectCategory={this.selectCategory}
+        />
+        <List
+          items={this.state.items}
+          handleEdit={this.handleEdit}
+          currentCategory={this.state.currentCategory}
+        />
       </div>
     );
   }

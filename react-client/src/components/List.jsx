@@ -19,6 +19,12 @@ const List = props => {
       {/* <h4>Bookmarks</h4> */}
       {/* There are {props.items.length} bookmarks. */}
       {Object.keys(groupedByCategory)
+        .filter(category => {
+          return (
+            category === props.currentCategory ||
+            props.currentCategory === 'Show All'
+          );
+        })
         .sort(comparator)
         .map(category => (
           <Category
