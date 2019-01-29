@@ -1,27 +1,67 @@
 body {
-  margin: 32px;
+  margin: 8px;
   padding: 16px;
-  font-family: circular, Helvetica, Arial, sans-serif;
+  font-family: Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   color: #484848;
   display: flex;
-  align-content: flex-start;
+  align-content: center;
+  a:link {
+    color:inherit;
+ }
 }
+
+.actionBar {
+  margin: 16px;
+  padding: 8px;
+  display: flex;
+  flex-direction: row;
+}
+
+.actionButtons {
+  margin: 16px;
+  font-size: 12px;
+  border-radius: 3.2px;
+}
+
+#delete {
+  max-width: 24px;
+  margin: 18px;
+  cursor: pointer;
+}
+
+
 
 h2 {
   color: #ebd735;
 }
+.form {
+  margin: 16px;
+  padding: 8px;
+  font-family: Helvetica, sans-serif;
+  font-size: 14px;
+  display: flex;
+  flex-direction: column
+}
+
+input {
+  margin: 8px
+}
 
 #category {
   display: flex;
-
+  width: 600px;
   flex-direction: column;
+  border: 1px solid #e4e4e4;
+  margin: 8px;
+  padding: 8px
 }
 #edit {
   max-width: 16px;
   max-height: 16px;
-  flex-direction: row;
   cursor: pointer;
+  margin: 8px
+
 }
 
 #add {
@@ -30,7 +70,7 @@ h2 {
 }
 
 #plus {
-  max-width: 16px;
+  max-width: 18px;
 }
 
 #close {
@@ -39,46 +79,38 @@ h2 {
 
 #list {
   flex-direction: row;
+  display: flex;
+  flex-wrap: wrap;
+  padding: 8px
 }
 
 #bookmark {
-  margin: 16px;
+  margin: 8px;
   width: 40%
   /* background-color: rgba(0, 0, 0, 0.25); */
 
   flex-direction: column;
 }
 #bookmarkInner {
+  display: flex;
   flex-direction: row;
   margin: 8px;
   align-content: flex-start;
 }
 
+.bookmarkDetails {
+  padding: 8px;
+  align-content: space-between
+}
 #list {
   margin: 8px;
-  border: 1px solid #e4e4e4;
 }
 
-/* #modal {
-  position: absolute;
-  top: 45px;
-  left: 50%;
-  background-color: rgb(72, 72, 72);
-  box-sizing: border-box;
-  padding: 32px;
-  transform: translate(-50%, 0);
-  width: 568px;
-  margin-bottom: 50px;
+.tags {
+  font-size: 10px;
+  line-height: 16px;
+  letter-spacing: normal;
+  text-transform: uppercase;
+  border-radius: 1px 3.2px solid #e4e4e4;;
+  padding: 4px;
 }
-
-.modalBackground {
-  position: fixed;
-  z-index: 2000;
-  top: 0px;
-  right: 0px;
-  bottom: 0px;
-  left: 0px;
-  overflow-y: auto;
-  background: rgba(0, 0, 0, 0.25);
-  overflow-y: auto;
-} */

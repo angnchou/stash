@@ -1,6 +1,7 @@
 import React from 'react';
 import Modal from 'react-modal';
 import ActionBar from './ActionBar.jsx';
+// import modal from '../../Dist/modal.css';
 
 Modal.setAppElement(document.getElementById('app'));
 
@@ -12,6 +13,7 @@ const customStyles = {
     bottom: 'auto',
     marginRight: '-50%',
     transform: 'translate(-50%, -50%)',
+    text: 'Helvetica',
   },
 };
 const BookmarkModal = props => {
@@ -42,7 +44,7 @@ const BookmarkModal = props => {
         <button>the modal</button>
       </form> */}
 
-      <form>
+      <form className="form">
         <label htmlFor="category">Add Category</label>
         <input
           type="text"
@@ -78,9 +80,9 @@ const BookmarkModal = props => {
           onChange={props.handleChange}
           value={props.tags}
         />
-        <button type="button" onClick={props.handleAdd}>
+        {/* <button type="button" onClick={props.handleAdd}>
           Add!
-        </button>
+        </button> */}
       </form>
     </Modal>
   );

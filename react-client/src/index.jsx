@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import $ from 'jquery';
 import List from './components/List.jsx';
 import BookmarkModal from './components/bookmarkModal.jsx';
+// import Dropdown from './components/Dropdown.jsx';
 
 const axios = require('axios');
 
@@ -18,6 +19,7 @@ class App extends React.Component {
       notes: '',
       tags: '',
       selectedId: null,
+      currentCategory: null,
     };
     this.openModal = this.openModal.bind(this);
     this.afterOpenModal = this.afterOpenModal.bind(this);
@@ -119,9 +121,14 @@ class App extends React.Component {
     });
   }
 
+  renderCategory(cat) {
+    this.setState({
+      currentCategory: cat,
+    });
+  }
+
   //need id otherwise every click adds to list
   saveOrUpdate() {
-    console.log('SAVE OR UPDATE');
     if (!this.state.selectedId) {
       $.post('/items/api', {
         category: this.state.category,
@@ -133,7 +140,7 @@ class App extends React.Component {
         .then(result => {
           this.fetchData();
           this.closeModal();
-          this.clearForm();
+          // this.clearForm();
         })
         .catch(err => {
           console.log(err);
@@ -152,7 +159,7 @@ class App extends React.Component {
         success: data => {
           this.fetchData();
           this.closeModal();
-          this.clearForm();
+          // this.clearForm();
         },
       });
     }
@@ -166,7 +173,6 @@ class App extends React.Component {
           src="https://png.pngtree.com/svg/20170315/plus_grey_880693.png"
           onClick={this.openModal}
         />
-        {/* <button >Open Modal</button> */}
         <BookmarkModal
           saveOrUpdate={this.saveOrUpdate}
           handleChange={this.handleChange}
@@ -184,6 +190,7 @@ class App extends React.Component {
           tags={this.state.tags}
         />
         <h2>Stash</h2>
+        {/* <Dropdown items={this.state.items} /> */}
         <List items={this.state.items} handleEdit={this.handleEdit} />
       </div>
     );
