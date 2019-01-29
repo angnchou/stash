@@ -17,33 +17,49 @@ class App extends React.Component {
       url: '',
       notes: '',
       tags: '',
-      selected: null,
+      selectedId: null,
     };
     this.openModal = this.openModal.bind(this);
     this.afterOpenModal = this.afterOpenModal.bind(this);
     this.closeModal = this.closeModal.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.handleAdd = this.handleAdd.bind(this);
-    this.handleSelect = this.handleSelect.bind(this);
     this.handleDelete = this.handleDelete.bind(this);
     this.handleEdit = this.handleEdit.bind(this);
+    this.clearForm = this.clearForm.bind(this);
+    this.saveOrUpdate = this.saveOrUpdate.bind(this);
+  }
+
+  clearForm() {
+    this.setState({
+      title: '',
+      category: '',
+      url: '',
+      notes: '',
+      tags: '',
+      selectedId: null,
+    });
   }
 
   componentDidMount() {
-    $.ajax({
-      url: '/items',
-      success: data => {
+    this.fetchData();
+  }
+
+  fetchData() {
+    $.get('/items')
+      .then(data => {
         this.setState({
           items: data,
         });
-      },
-      error: err => {
+      })
+      .catch(err => {
         console.log('err', err);
-      },
-    });
+      });
   }
+
   openModal() {
     this.setState({ modalIsOpen: true });
+    this.clearForm();
   }
 
   afterOpenModal() {
@@ -62,50 +78,35 @@ class App extends React.Component {
 
   handleAdd(event) {
     event.preventDefault();
-    $.ajax({
-      method: 'POST',
-      url: '/items',
-      data: {
-        title: this.state.title,
-        category: this.state.category,
-        url: this.state.url,
-        notes: this.state.note,
-        tags: this.state.tags,
-      },
-      success: data => {
-        this.setState({
-          items: data,
-          title: '',
-          category: '',
-          url: '',
-          notes: '',
-          tags: '',
-        });
-      },
+    $.post('/items/api', {
+      title: this.state.title,
+      category: this.state.category,
+      url: this.state.url,
+      notes: this.state.note,
+      tags: this.state.tags,
+    }).then(data => {
+      this.fetchData();
+      this.closeModal();
+      this.clearForm();
     });
-    this.closeModal();
   }
 
   //change status to either delete or edit
   //delete is done in the back end
-  handleSelect(bookmark) {
-    this.setState({
-      selected: bookmark,
-    });
-  }
 
-  handleDelete(bookmark) {
+  handleDelete() {
     $.ajax({
       method: 'DELETE',
-      url: '/items/delete/' + `${bookmark.id}`,
+      url: `/items/delete/${this.state.selectedId}`,
       success: data => {
         this.setState({
           items: data,
         });
+        this.clearForm();
+        this.closeModal();
       },
     });
   }
-
   handleEdit(bookmark) {
     this.setState({
       title: bookmark.title,
@@ -113,61 +114,72 @@ class App extends React.Component {
       url: bookmark.url,
       notes: bookmark.notes,
       tags: bookmark.tags,
+      modalIsOpen: true,
+      selectedId: bookmark.id,
     });
-    $.ajax({
-      method: 'PATCH',
-      url: '/items/edit/' + `${bookmark.id}`,
-      data: BookmarkModal,
-      success: (err, data) => {
-        this.setState({
-          items: data,
+  }
+
+  //need id otherwise every click adds to list
+  saveOrUpdate() {
+    console.log('SAVE OR UPDATE');
+    if (!this.state.selectedId) {
+      $.post('/items/api', {
+        category: this.state.category,
+        url: this.state.url,
+        notes: this.state.notes,
+        tags: this.state.tags,
+        modalIsOpen: true,
+      })
+        .then(result => {
+          this.fetchData();
+          this.closeModal();
+          this.clearForm();
+        })
+        .catch(err => {
+          console.log(err);
         });
-      },
-    });
+    } else {
+      $.ajax({
+        method: 'PATCH',
+        url: `/items/${this.state.selectedId}`,
+        data: {
+          title: this.state.title,
+          category: this.state.category,
+          url: this.state.url,
+          notes: this.state.notes,
+          tags: this.state.tags,
+        },
+        success: data => {
+          this.fetchData();
+          this.closeModal();
+          this.clearForm();
+        },
+      });
+    }
   }
 
   render() {
     return (
       <div>
-        {/* <div onClick={this.renderAdd} id="add">
-          Add Bookmark:
-          {this.state.renderAdd ? (
-            <div id="modalBackground">
-              {' '}
-              <AddBookmark
-                title={this.state.title}
-                category={this.state.category}
-                url={this.state.url}
-                tags={this.state.tags}
-                notes={this.state.notes}
-                handleAdd={this.handleAdd}
-                handleChange={this.handleChange}
-              />{' '}
-            </div>
-          ) : null} */}
-        {/* </div> */}
         <button onClick={this.openModal}>Open Modal</button>
-        <div>
-          {this.state.selected === null ? null : (
-            <BookmarkModal
-              modalIsOpen={this.state.modalIsOpen}
-              onAfterOpen={this.afterOpenModal}
-              closeModal={this.closeModal}
-              handleAdd={this.handleAdd}
-              selected={this.state.selected}
-              handleDelete={this.handleDelete}
-              handleEdit={this.handleEdit}
-            />
-          )}
-        </div>
-
-        <h1>Item List</h1>
-
-        <List
-          openModal={this.openModal}
-          handleSelect={this.handleSelect}
-          items={this.state.items}
+        <BookmarkModal
+          saveOrUpdate={this.saveOrUpdate}
+          handleChange={this.handleChange}
+          modalIsOpen={this.state.modalIsOpen}
+          onAfterOpen={this.afterOpenModal}
+          closeModal={this.closeModal}
+          handleAdd={this.handleAdd}
+          selectedId={this.state.selectedId}
+          handleDelete={this.handleDelete}
+          handleEdit={this.handleEdit}
+          title={this.state.title}
+          category={this.state.category}
+          url={this.state.url}
+          notes={this.state.notes}
+          tags={this.state.tags}
         />
+        <h2>Stash</h2>
+        <List items={this.state.items} handleEdit={this.handleEdit} />
       </div>
     );
   }

@@ -24,12 +24,14 @@ const BookmarkModal = props => {
     >
       {/* <h2 ref={subtitle => (this.subtitle = subtitle)}>Hello</h2> */}
       <button onClick={props.closeModal}>close</button>
-      <div>I am a modal</div>
+
       <ActionBar
-        selected={props.selected}
+        saveOrUpdate={props.saveOrUpdate}
+        selectedId={props.selectedId}
         handleDelete={props.handleDelete}
         handleEdit={props.handleEdit}
       />
+
       {/* <form>
         <input />
         <button>tab navigation</button>
@@ -77,6 +79,9 @@ const BookmarkModal = props => {
         <button type="button" onClick={props.handleAdd}>
           Add!
         </button>
+        {/* <button type="button" onClick={props.handleDelete(props.selectedId)}>
+          Delete
+        </button> */}
       </form>
     </Modal>
   );

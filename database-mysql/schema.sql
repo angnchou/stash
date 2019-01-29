@@ -6,7 +6,7 @@ USE stash;
 
 CREATE TABLE bookmarks (
   id int NOT NULL AUTO_INCREMENT,
-  title varchar(50) NOT NULL,
+  title varchar(255) NOT NULL,
   tags varchar(50),
   category varchar(50),
   url varchar(255) NOT NULL,
