@@ -2,12 +2,15 @@ body {
   margin: 8px;
   padding: 16px;
   font-family: Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
+  /* -webkit-font-smoothing: antialiased; */
   color: #484848;
   display: flex;
   align-content: center;
-  a:link {
-    color: inherit;
+  a,
+  a:visited,
+  a:hover,
+  a:active {
+    color: #484848;
   }
 }
 
@@ -30,7 +33,7 @@ body {
   cursor: pointer;
 }
 
-h2 {
+h1 {
   color: #ebd735;
 }
 .form {
@@ -83,8 +86,9 @@ input {
 
 #bookmark {
   margin: 8px;
-  width: 40%;
-  flex-direction: column;
+  /* width: 35% */
+
+  /* flex-direction: row; */
 }
 #bookmarkInner {
   display: flex;
