@@ -6,11 +6,6 @@ const ActionBar = props => {
         <button className="actionButtons" onClick={props.saveOrUpdate}>
           {props.selectedId ? 'Update' : 'Save'}
         </button>
-
-        {/* <img
-          src="http://www.stickpng.com/assets/images/585e4831cb11b227491c338e.png"
-          onClick={props.saveOrUpdate}
-        /> */}
       </div>
       <div>
         <button className="actionButtons" onClick={props.handleDelete}>

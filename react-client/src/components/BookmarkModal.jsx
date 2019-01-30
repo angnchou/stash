@@ -1,7 +1,6 @@
 import React from 'react';
 import Modal from 'react-modal';
 import ActionBar from './ActionBar.jsx';
-// import modal from '../../Dist/modal.css';
 
 Modal.setAppElement(document.getElementById('app'));
 
@@ -35,15 +34,6 @@ const BookmarkModal = props => {
         handleDelete={props.handleDelete}
         handleEdit={props.handleEdit}
       />
-
-      {/* <form>
-        <input />
-        <button>tab navigation</button>
-        <button>stays</button>
-        <button>inside</button>
-        <button>the modal</button>
-      </form> */}
-
       <form className="form">
         <label htmlFor="category">Add Category</label>
         <input
@@ -80,9 +70,6 @@ const BookmarkModal = props => {
           onChange={props.handleChange}
           value={props.tags}
         />
-        {/* <button type="button" onClick={props.handleAdd}>
-          Add!
-        </button> */}
       </form>
     </Modal>
   );

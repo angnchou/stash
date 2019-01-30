@@ -14,15 +14,10 @@ const ListItem = props => {
           <a href={props.item.url} target="_blank">
             <div title={props.item.url}>{props.item.title}</div>
           </a>
-          {/* 
-      <div id="url">{props.item.url}</div> */}
-
           <div>{props.item.notes}</div>
-
           <div className="tags" id="tags">
             {props.item.tags}
           </div>
-
           <img
             id="edit"
             src="https://image.flaticon.com/icons/png/512/23/23187.png"

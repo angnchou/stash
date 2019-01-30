@@ -16,8 +16,6 @@ const List = props => {
   const groupedByCategory = _.groupBy(props.items, 'category');
   return (
     <div id="list">
-      {/* <h4>Bookmarks</h4> */}
-      {/* There are {props.items.length} bookmarks. */}
       {Object.keys(groupedByCategory)
         .filter(category => {
           return (

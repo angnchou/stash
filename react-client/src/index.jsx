@@ -94,9 +94,6 @@ class App extends React.Component {
     });
   }
 
-  //change status to either delete or edit
-  //delete is done in the back end
-
   handleDelete() {
     $.ajax({
       method: 'DELETE',
@@ -130,7 +127,6 @@ class App extends React.Component {
     });
   }
 
-  //need id otherwise every click adds to list
   saveOrUpdate() {
     if (!this.state.selectedId) {
       $.post('/items/api', {
@@ -162,7 +158,6 @@ class App extends React.Component {
         success: data => {
           this.fetchData();
           this.closeModal();
-          // this.clearForm();
         },
       });
     }

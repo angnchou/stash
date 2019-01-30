@@ -1,7 +1,5 @@
 import React from 'react';
 
-// import ListItem from './ListItem.jsx';
-
 export default function Dropdown(props) {
   const groupedByCategory = _.groupBy(props.items, 'category');
   return (
