@@ -1,9 +1,11 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 // UNCOMMENT THE DATABASE YOU'D LIKE TO USE
-const db = require('../database-mysql');
+// const db = require('../database-mysql');
+const db = require('../database-postgres');
+
 const diffApi = require('./diffApi.js');
-const port = 4000;
+const port = process.env.PORT || 8000;
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
