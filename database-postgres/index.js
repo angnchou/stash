@@ -1,16 +1,23 @@
 const urlApi = require('../server/urlApi.js');
 const { pg, Client } = require('pg');
 
-const client = new Client({
-  host: 'localhost' || process.env.DATABASE_URL,
-  user: 'achou',
-  database: 'stash',
-});
+//used for local dev
+// const client = new Client({
+//   host: process.env.DATABASE_URL || 'localhost',
+//   user: 'achou',
+//   database: 'stash',
+// });
 
 // const connectionString =
 //   process.env.DATABASE_URL || 'postgres://localhost:5432/stash';
 
 // const client = new pg.Client(connectionString);
+
+//updated connectionString for Heroku
+const client = new Client({
+  connectionString: process.env.DATABASE_URL,
+  ssl: true,
+});
 
 client.connect();
 
