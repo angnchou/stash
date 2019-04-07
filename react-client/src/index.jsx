@@ -2,10 +2,8 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import $ from 'jquery';
 import List from './components/List.jsx';
-import BookmarkModal from './components/bookmarkModal.jsx';
+import BookmarkModal from './components/BookmarkModal.jsx';
 import Dropdown from './components/Dropdown.jsx';
-
-const axios = require('axios');
 
 class App extends React.Component {
   constructor(props) {
