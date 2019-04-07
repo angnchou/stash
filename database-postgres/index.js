@@ -1,29 +1,23 @@
 const urlApi = require('../server/urlApi.js');
-const { pg, Client } = require('pg');
+const { Client } = require('pg');
 
-//used for local dev
-// const client = new Client({
-//   host: process.env.DATABASE_URL || 'localhost',
-//   user: 'achou',
-//   database: 'stash',
-// });
-
-// const connectionString =
-//   process.env.DATABASE_URL || 'postgres://localhost:5432/stash';
-
-// const client = new pg.Client(connectionString);
-
-//updated connectionString for Heroku
-const client = new Client({
-  connectionString: process.env.DATABASE_URL,
-  ssl: true,
-});
-
-client.connect();
+if (!process.env.DATABASE_URL) {
+  client = new Client({
+    host: 'localhost',
+    user: 'achou',
+    database: 'stash',
+  });
+  client.connect();
+} else {
+  client = new Client({
+    connectionString: process.env.DATABASE_URL,
+    ssl: true,
+  });
+  client.connect();
+}
 
 const selectAll = callback => {
   client.query('SELECT * FROM bookmarks', (err, results, fields) => {
-    // console.log(results, 'RESULTS DB');
     if (err) {
       callback(err, null);
     } else {
@@ -58,11 +52,11 @@ const setImage = (id, img, cb) => {
 
 const update = (id, data, cb) => {
   client.query(
-    `UPDATE bookmarks SET title="${data.title}", tags="${
+    `UPDATE bookmarks SET title='${data.title}', tags='${
       data.tags
-    }", category="${data.category}", url="${data.url}", notes="${
+    }', category='${data.category}', url='${data.url}', notes='${
       data.notes
-    }" WHERE id=${id}`,
+    }' WHERE id=${id}`,
     (err, result) => {
       if (err) {
         cb(err, null);

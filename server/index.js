@@ -39,6 +39,7 @@ app.post('/items/api', function(req, res) {
         req.body.notes,
         (err, newId) => {
           if (err) {
+            console.log(err, 'ERR server');
             res.status(500).send(err);
           } else {
             res.status(200).send({ success: true });
@@ -79,6 +80,7 @@ app.post('/items', function(req, res) {
 app.patch('/items/:id', (req, res) => {
   db.update(req.params.id, req.body, (err, data) => {
     if (err) {
+      console.log(err, 'ERR server');
       res.status(500).send(err);
     } else {
       res.json(data);
