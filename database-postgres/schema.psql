@@ -2,10 +2,10 @@ DROP DATABASE IF EXISTS stash;
 
 CREATE DATABASE stash;
 
-USE stash;
+\c stash;
 
 CREATE TABLE bookmarks (
-  id int NOT NULL AUTO_INCREMENT,
+  id SERIAL NOT NULL,
   title varchar(255) NOT NULL,
   tags varchar(50),
   category varchar(50),
@@ -15,7 +15,7 @@ CREATE TABLE bookmarks (
 );
 
 CREATE TABLE categories (
-  id int NOT NULL AUTO_INCREMENT, 
+  id SERIAL NOT NULL , 
   category varchar(50),
   category_id int NOT NULL,
   PRIMARY KEY (id)

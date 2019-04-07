@@ -20,6 +20,7 @@ app.use(express.static(__dirname + '/../react-client/dist'));
 app.get('/items', function(req, res) {
   db.selectAll((err, data) => {
     if (err) {
+      console.log(err, 'ERR SERVER');
       res.status(500).send(err);
     } else {
       res.send(data);

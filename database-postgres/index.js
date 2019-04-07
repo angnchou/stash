@@ -16,10 +16,11 @@ client.connect();
 
 const selectAll = callback => {
   client.query('SELECT * FROM bookmarks', (err, results, fields) => {
+    // console.log(results, 'RESULTS DB');
     if (err) {
       callback(err, null);
     } else {
-      const data = results.map(bookmark => {
+      const data = results['rows'].map(bookmark => {
         bookmark.img = urlApi.getScreenshotUrl(bookmark.url);
         return bookmark;
       });
@@ -30,7 +31,7 @@ const selectAll = callback => {
 
 const add = (title, tags, category, url, notes, cb) => {
   client.query(
-    `INSERT INTO bookmarks (title, tags, category, url, notes) VALUES ("${title}", "${tags}", "${category}", "${url}", "${notes}")`,
+    `INSERT INTO bookmarks (title, tags, category, url, notes) VALUES ('${title}', '${tags}', '${category}', '${url}', '${notes}')`,
     (err, result) => {
       if (err) {
         console.log(err, 'ERR');
