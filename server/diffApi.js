@@ -6,12 +6,12 @@ module.exports = {
     axios
       .get(
         `http://api.diffbot.com/v3/analyze?token=${diffApiKey}&url=${encodeURIComponent(
-          url,
-        )}`,
+          url
+        )}`
       )
       .then(result => {
         return {
           title: result.data.title,
         };
-      }),
+      })
 };

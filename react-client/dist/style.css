@@ -113,3 +113,8 @@ input {
   border-radius: 1px 3.2px solid #e4e4e4;
   padding: 4px;
 }
+
+.error {
+  color:red;
+  font-size: 14px;
+}

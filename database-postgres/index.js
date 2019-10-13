@@ -16,6 +16,21 @@ if (!process.env.DATABASE_URL) {
   client.connect();
 }
 
+//check if hashed equalls what is stored in db
+const login = (username, cb) => {
+  client.query(`SELECT * FROM users WHERE username = '${username}'`, (err, result) => {
+    if (err) {
+      cb(err, null);
+    } else {
+      for (var i = 0; i < result['rows'].length; i++) {
+        if (result.rows[i].username === username) {
+          cb(err, result.rows[i].password_hash, 'hash sent from db');
+        }
+      }
+    }
+  });
+}
+
 const selectAll = callback => {
   client.query('SELECT * FROM bookmarks', (err, results, fields) => {
     if (err) {
@@ -35,27 +50,24 @@ const add = (title, tags, category, url, notes, cb) => {
     `INSERT INTO bookmarks (title, tags, category, url, notes) VALUES ('${title}', '${tags}', '${category}', '${url}', '${notes}')`,
     (err, result) => {
       if (err) {
-        console.log(err, 'ERR');
         cb(err, null);
       } else {
         cb(null, result.insertId);
       }
-    },
+    }
   );
 };
 
 const setImage = (id, img, cb) => {
-  console.log('id: ' + id);
-  console.log('img: ' + img.length);
   client.query('UPDATE bookmarks SET img=? WHERE id=?', [img, id], cb);
 };
 
 const update = (id, data, cb) => {
   client.query(
     `UPDATE bookmarks SET title='${data.title}', tags='${
-      data.tags
+    data.tags
     }', category='${data.category}', url='${data.url}', notes='${
-      data.notes
+    data.notes
     }' WHERE id=${id}`,
     (err, result) => {
       if (err) {
@@ -63,7 +75,7 @@ const update = (id, data, cb) => {
       } else {
         cb(null, result);
       }
-    },
+    }
   );
 };
 
@@ -78,6 +90,7 @@ const deleteBookmark = (id, cb) => {
 };
 
 module.exports = {
+  login,
   selectAll,
   add,
   setImage,
