@@ -1,7 +1,7 @@
 const express = require('express');
+const app = express();
 const bodyParser = require('body-parser');
-// UNCOMMENT THE DATABASE YOU'D LIKE TO USE
-// const db = require('../database-mysql');
+
 const db = require('../database-postgres');
 const path = require('path');
 
@@ -11,20 +11,32 @@ const loginSecret = require('./secret.js');
 const diffApi = require('./diffApi.js');
 const port = process.env.PORT || 8000;
 
-const app = express();
+const pug = require('pug');
+
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(express.static(__dirname + '/../react-client/dist/'));
 
+// app.get('/login', function (req, res) {
+//   res.sendFile(path.resolve('react-client/dist/login.html'));
+// });
+
+//template engine
+app.set('views', './server/views');
+app.set('view engine', 'pug');
+
 app.get('/login', function (req, res) {
-  res.sendFile(path.resolve('react-client/dist/login.html'));
+  const params = {};
+  if (req.query.error === 'badpassword') {
+    params.error = 'Incorrect password, try again';
+  }
+  res.render('login', params);
 });
 
-
 app.post('/login', function (req, res) {
-  let pw = JSON.stringify(req.body['password']);
-  let checkHash = sha256.hmac(loginSecret, pw);
-  let user = req.body['username'];
+  const pw = JSON.stringify(req.body['password']);
+  const checkHash = sha256.hmac(loginSecret, pw);
+  const user = req.body['username'];
   db.login(user, (err, data) => {
     if (err) {
       res.status(500).send('db problem :(');
