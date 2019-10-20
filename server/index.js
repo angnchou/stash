@@ -34,9 +34,10 @@ app.get('/login', function (req, res) {
 })
 
 app.post('/login', function (req, res) {
-  const pw = JSON.stringify(req.body['password']);
+  const pw = req.body.password;
   const checkHash = sha256.hmac(loginSecret, pw);
-  const user = req.body['username'];
+  const user = req.body.username;
+
   db.login(user, (err, data) => {
     if (err) {
       res.status(500).send('db problem :(');
