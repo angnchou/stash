@@ -3,7 +3,6 @@ const app = express();
 const bodyParser = require('body-parser');
 
 const db = require('../database-postgres');
-const path = require('path');
 
 const sha256 = require('js-sha256');
 const loginSecret = require('./secret.js');
@@ -11,7 +10,7 @@ const loginSecret = require('./secret.js');
 const diffApi = require('./diffApi.js');
 const port = process.env.PORT || 8000;
 
-const pug = require('pug');
+const session = require('express-session');
 
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -25,13 +24,26 @@ app.use(express.static(__dirname + '/../react-client/dist/'));
 app.set('views', './server/views');
 app.set('view engine', 'pug');
 
+app.use(session({ secret: 'hoi', resave: false, saveUninitialized: false }));
+
 app.get('/login', function (req, res) {
-  const params = {};
-  if (req.query.error === 'badpassword') {
-    params.error = 'Incorrect password, try again';
+  if (req.session.err) {
+    const msg = req.session.err;
+    req.session.err = '';
+    res.render('login', { error: msg });
+  } else {
+    res.render('login');
   }
-  res.render('login', params);
-});
+})
+
+
+// app.get('/login', function (req, res) {
+//   const params = {};
+//   if (req.query.error === 'badpassword') {
+//     params.error = 'Incorrect password, try again';
+//   }
+//   res.render('login', params);
+// });
 
 app.post('/login', function (req, res) {
   const pw = JSON.stringify(req.body['password']);
@@ -44,11 +56,13 @@ app.post('/login', function (req, res) {
       if (checkHash === data) {
         res.redirect('/');
       } else {
-        res.redirect('/login?error=badpassword');
+        req.session.err = 'Incorrect password, try again!';
+        res.redirect('/login');
       }
     }
   });
 });
+
 
 app.get('/items', function (req, res) {
   db.selectAll((err, data) => {
