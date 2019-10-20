@@ -5,7 +5,7 @@ const bodyParser = require('body-parser');
 const db = require('../database-postgres');
 
 const sha256 = require('js-sha256');
-const loginSecret = require('./secret.js');
+const loginSecret = process.env.SECRET || require('./secret.js');
 
 const diffApi = require('./diffApi.js');
 const port = process.env.PORT || 8000;
@@ -16,14 +16,11 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(express.static(__dirname + '/../react-client/dist/'));
 
-// app.get('/login', function (req, res) {
-//   res.sendFile(path.resolve('react-client/dist/login.html'));
-// });
-
 //template engine
 app.set('views', './server/views');
 app.set('view engine', 'pug');
 
+//session
 app.use(session({ secret: 'hoi', resave: false, saveUninitialized: false }));
 
 app.get('/login', function (req, res) {
@@ -35,15 +32,6 @@ app.get('/login', function (req, res) {
     res.render('login');
   }
 })
-
-
-// app.get('/login', function (req, res) {
-//   const params = {};
-//   if (req.query.error === 'badpassword') {
-//     params.error = 'Incorrect password, try again';
-//   }
-//   res.render('login', params);
-// });
 
 app.post('/login', function (req, res) {
   const pw = JSON.stringify(req.body['password']);
