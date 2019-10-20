@@ -22,10 +22,10 @@ const login = (username, cb) => {
     if (err) {
       cb(err, null);
     } else {
-      for (var i = 0; i < result['rows'].length; i++) {
-        if (result.rows[i].username === username) {
-          cb(err, result.rows[i].password_hash, 'hash sent from db');
-        }
+      if (result.rows.length === 0) {
+        cb(null, null);
+      } else {
+        cb(err, result.rows[0].password_hash);
       }
     }
   });

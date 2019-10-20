@@ -38,16 +38,22 @@ app.post('/login', function (req, res) {
   const checkHash = sha256.hmac(loginSecret, pw);
   const user = req.body.username;
 
+  if (pw === '' || user === '') {
+    req.session.err = 'Username and password are required!';
+    res.redirect('/login');
+    return;
+  }
   db.login(user, (err, data) => {
     if (err) {
       res.status(500).send('db problem :(');
+    } else if (data === null) {
+      req.session.err = 'User not found!';
+      res.redirect('/login');
+    } else if (checkHash === data) {
+      res.redirect('/');
     } else {
-      if (checkHash === data) {
-        res.redirect('/');
-      } else {
-        req.session.err = 'Incorrect password, try again!';
-        res.redirect('/login');
-      }
+      req.session.err = 'Incorrect password, try again!';
+      res.redirect('/login');
     }
   });
 });
