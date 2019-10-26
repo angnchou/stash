@@ -12,7 +12,10 @@ const port = process.env.PORT || 8000;
 
 const session = require('express-session');
 
+const cookieParser = require('cookie-parser');
+
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 app.use(express.static(__dirname + '/../react-client/dist/'));
 
@@ -24,25 +27,26 @@ app.set('view engine', 'pug');
 app.use(session({ secret: 'hoi', resave: false, saveUninitialized: false }));
 
 app.get('/login', function (req, res) {
+  const username = req.cookies.username;
   if (req.session.err) {
     const msg = req.session.err;
     req.session.err = '';
-    res.render('login', { error: msg });
+    res.render('login', { error: msg, username: username });
   } else {
-    res.render('login');
+    res.render('login', { username: username });
   }
 })
 
 app.post('/login', function (req, res) {
   const pw = req.body.password;
-  const checkHash = sha256.hmac(loginSecret, pw);
   const user = req.body.username;
 
-  if (pw === '' || user === '') {
+  if (!pw || !user) {
     req.session.err = 'Username and password are required!';
     res.redirect('/login');
     return;
   }
+  const checkHash = sha256.hmac(loginSecret, pw);
   db.login(user, (err, data) => {
     if (err) {
       res.status(500).send('db problem :(');
@@ -50,6 +54,9 @@ app.post('/login', function (req, res) {
       req.session.err = 'User not found!';
       res.redirect('/login');
     } else if (checkHash === data) {
+      if (req.body.rememberMe === 'on') {
+        res.cookie('username', req.body.username)
+      }
       res.redirect('/');
     } else {
       req.session.err = 'Incorrect password, try again!';

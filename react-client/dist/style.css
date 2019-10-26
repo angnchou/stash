@@ -120,3 +120,8 @@ input {
   color:red;
   font-size: 14px;
 }
+
+.checkbox-label {
+  font-size: 14px;
+  color: grey;
+}

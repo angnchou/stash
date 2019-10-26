@@ -9,6 +9,9 @@ body
   p(class="error")=error
   div(id="login")
     form(method="post")
-      input(type="text" placeholder="username" name="username")
+      input(type="text" placeholder="username" name="username" value=username)
       input(type="password" placeholder="password" name="password")
       input(type="submit" name="submit")
+      div
+        input(type="checkbox" id="remember-me" name="rememberMe")
+        label(for="remember-me" class="checkbox-label")="Remember me"
