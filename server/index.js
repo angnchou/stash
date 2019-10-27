@@ -26,6 +26,19 @@ app.set('view engine', 'pug');
 //session
 app.use(session({ secret: 'hoi', resave: false, saveUninitialized: false }));
 
+//parse auth
+
+const parseUser = (str) => {
+  const index = str.indexOf('_');
+  return str.slice(0, index);
+}
+
+const parseAuth = (str) => {
+  const index = str.indexOf('_') + 1;
+  return str.slice(index);
+}
+
+
 app.get('/login', function (req, res) {
   const username = req.cookies.username;
   if (req.session.err) {
@@ -55,8 +68,10 @@ app.post('/login', function (req, res) {
       res.redirect('/login');
     } else if (checkHash === data) {
       if (req.body.rememberMe === 'on') {
-        res.cookie('username', req.body.username)
+        res.cookie('username', req.body.username);
       }
+      const checkAuth = sha256.hmac(loginSecret, req.body.username);
+      res.cookie('auth', `${req.body.username}` + '_' + `${checkAuth}`);
       res.redirect('/');
     } else {
       req.session.err = 'Incorrect password, try again!';
@@ -64,6 +79,27 @@ app.post('/login', function (req, res) {
     }
   });
 });
+
+
+app.use(function (req, res, next) {
+  if (req.cookies.auth) {
+    const userNameAuth = parseUser(req.cookies.auth);
+    const hashAuth = parseAuth(req.cookies.auth);
+    const checkAuth = sha256.hmac(loginSecret, userNameAuth);
+    if (checkAuth === hashAuth) {
+      next();
+    } else {
+      res.clearCookie('auth');
+      res.redirect('/login');
+    }
+  } else {
+    res.redirect('/login');
+  }
+})
+
+app.get('/', function (req, res) {
+  res.render('index');
+})
 
 
 app.get('/items', function (req, res) {
