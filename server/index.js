@@ -14,6 +14,8 @@ const session = require('express-session');
 
 const cookieParser = require('cookie-parser');
 
+const jwt = require('jsonwebtoken');
+
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 
@@ -37,6 +39,11 @@ const parseAuth = (str) => {
   const index = str.indexOf('_') + 1;
   return str.slice(index);
 }
+
+app.get('/logout', function (req, res) {
+  res.clearCookie('auth');
+  res.redirect('/login');
+})
 
 
 app.get('/login', function (req, res) {
@@ -70,8 +77,11 @@ app.post('/login', function (req, res) {
       if (req.body.rememberMe === 'on') {
         res.cookie('username', req.body.username);
       }
-      const checkAuth = sha256.hmac(loginSecret, req.body.username);
-      res.cookie('auth', `${req.body.username}` + '_' + `${checkAuth}`);
+      // const checkAuth = sha256.hmac(loginSecret, req.body.username);
+      const jwtAuth = jwt.sign({ username: req.body.username }, loginSecret);
+      res.cookie('auth', jwtAuth);
+      // res.cookie('auth', jwtAuth);
+
       res.redirect('/');
     } else {
       req.session.err = 'Incorrect password, try again!';
@@ -83,12 +93,12 @@ app.post('/login', function (req, res) {
 
 app.use(function (req, res, next) {
   if (req.cookies.auth) {
-    const userNameAuth = parseUser(req.cookies.auth);
-    const hashAuth = parseAuth(req.cookies.auth);
-    const checkAuth = sha256.hmac(loginSecret, userNameAuth);
-    if (checkAuth === hashAuth) {
+    // const checkAuth = sha256.hmac(loginSecret, userNameAuth);
+    try {
+      const checkAuth = jwt.verify(req.cookies.auth, loginSecret);
+      console.log(checkAuth, 'checkAuth');
       next();
-    } else {
+    } catch (e) {
       res.clearCookie('auth');
       res.redirect('/login');
     }

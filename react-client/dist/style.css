@@ -125,3 +125,8 @@ input {
   font-size: 14px;
   color: grey;
 }
+
+#header {
+  display: flex;
+  justify-content: space-between;
+}
