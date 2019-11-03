@@ -2,3 +2,6 @@ node_modules
 server/apiKeys.js
 react-client/dist/bundle.js
 secret.js
+clientID.js
+clientSecret.js
+apiKeys.js

@@ -1,5 +1,9 @@
 const express = require('express');
 const app = express();
+const { google } = require('googleapis');
+const clientID = require('./clientID');
+const clientSecret = require('./clientSecret');
+
 const bodyParser = require('body-parser');
 
 const db = require('../database-postgres');
@@ -27,6 +31,35 @@ app.set('view engine', 'pug');
 
 //session
 app.use(session({ secret: 'hoi', resave: false, saveUninitialized: false }));
+
+//OAuth
+const oauth2Client = new google.auth.OAuth2(
+  clientID,
+  clientSecret,
+  'http://localhost:8000/googleauth'
+);
+
+
+app.get('/googleauthtest', function (req, res) {
+  const url = oauth2Client.generateAuthUrl({
+    scope: 'email'
+  });
+  res.redirect(url);
+})
+
+
+
+app.get('/googleauth', function (req, res) {
+  const code = req.query.code;
+  async function getToken(code) {
+    const { tokens } = await oauth2Client.getToken(code);
+    oauth2Client.setCredentials(tokens);
+    console.log(tokens, 'TOKENS')
+  }
+  getToken(code);
+})
+
+
 
 //parse auth
 
