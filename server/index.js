@@ -44,21 +44,35 @@ app.get('/googleauthtest', function (req, res) {
   const url = oauth2Client.generateAuthUrl({
     scope: 'email'
   });
+  console.log(url, 'url')
   res.redirect(url);
 })
 
-
+//TODO convert to promises
+// app.get('/googleauth', function (req, res) {
+//   const code = req.query.code;
+//   console.log(code, 'code')
+//   // async function getToken(code) {
+//   const { tokens } = oauth2Client.getToken(code);
+//   oauth2Client.setCredentials(tokens);
+//   console.log(tokens, 'TOKENS')
+//   // }
+//   // getToken(code);
+// })
 
 app.get('/googleauth', function (req, res) {
   const code = req.query.code;
-  async function getToken(code) {
-    const { tokens } = await oauth2Client.getToken(code);
-    oauth2Client.setCredentials(tokens);
-    console.log(tokens, 'TOKENS')
-  }
-  getToken(code);
-})
+  console.log(code, 'codeeeee')
+  oauth2Client.getToken(code)
 
+    .then(tokens => {
+      oauth2Client.setCredentials(tokens);
+      console.log(tokens, "TOKENSSSS")
+    })
+    .catch(err => {
+      console.log(err, 'ERRRR');
+    })
+})
 
 
 //parse auth
