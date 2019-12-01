@@ -3,6 +3,7 @@ doctype html
 head  
   title Stash Login Pug
   link(rel="stylesheet" type="text/css" href="/style.css")
+  include /clientID.pug
 
 body  
   h2="Login to See Your Stash"
@@ -15,3 +16,6 @@ body
       div
         input(type="checkbox" id="remember-me" name="rememberMe")
         label(for="remember-me" class="checkbox-label")="Remember me"
+        script(src="https://apis.google.com/js/platform.js")
+      div(class="g-signin2" data-onsuccess="onSignIn")
+    

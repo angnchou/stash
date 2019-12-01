@@ -3,6 +3,7 @@ const app = express();
 const { google } = require('googleapis');
 const clientID = require('./clientID');
 const clientSecret = require('./clientSecret');
+const path = require('path');
 
 const bodyParser = require('body-parser');
 
@@ -20,6 +21,9 @@ const cookieParser = require('cookie-parser');
 
 const jwt = require('jsonwebtoken');
 
+const { OAuth2Client } = require('google-auth-library');
+const client = new OAuth2Client(clientID);
+
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 
@@ -28,18 +32,19 @@ app.use(express.static(__dirname + '/../react-client/dist/'));
 //template engine
 app.set('views', './server/views');
 app.set('view engine', 'pug');
+app.locals.basedir = path.join(__dirname, 'views');
 
 //session
 app.use(session({ secret: 'hoi', resave: false, saveUninitialized: false }));
 
-//OAuth
+//OAuth client with redirect URI
 const oauth2Client = new google.auth.OAuth2(
   clientID,
   clientSecret,
-  'http://localhost:8000/googleauth'
+  'http://localhost:8000/stashgoogleauth'
 );
 
-
+//kicks off oauth flow
 app.get('/googleauthtest', function (req, res) {
   const url = oauth2Client.generateAuthUrl({
     scope: 'email'
@@ -48,29 +53,27 @@ app.get('/googleauthtest', function (req, res) {
   res.redirect(url);
 })
 
-//TODO convert to promises
-// app.get('/googleauth', function (req, res) {
-//   const code = req.query.code;
-//   console.log(code, 'code')
-//   // async function getToken(code) {
-//   const { tokens } = oauth2Client.getToken(code);
-//   oauth2Client.setCredentials(tokens);
-//   console.log(tokens, 'TOKENS')
-//   // }
-//   // getToken(code);
-// })
-
-app.get('/googleauth', function (req, res) {
+//authenticating user
+app.get('/stashgoogleauth', function (req, res) {
   const code = req.query.code;
   console.log(code, 'codeeeee')
   oauth2Client.getToken(code)
-
     .then(tokens => {
       oauth2Client.setCredentials(tokens);
-      console.log(tokens, "TOKENSSSS")
+      client.verifyIdToken({
+        idToken: tokens.tokens.id_token,
+        audience: clientID
+      })
+        .then(({ payload }) => {
+          if (payload.email_verified && payload.email) {
+            const oauthCookie = jwt.sign({ username: req.body.username, email: payload.email }, loginSecret);
+            res.cookie('auth', oauthCookie);
+          }
+          res.redirect('/');
+        })
     })
     .catch(err => {
-      console.log(err, 'ERRRR');
+      console.log(err, 'CAUGHTERRRR');
     })
 })
 
@@ -127,7 +130,6 @@ app.post('/login', function (req, res) {
       // const checkAuth = sha256.hmac(loginSecret, req.body.username);
       const jwtAuth = jwt.sign({ username: req.body.username }, loginSecret);
       res.cookie('auth', jwtAuth);
-      // res.cookie('auth', jwtAuth);
 
       res.redirect('/');
     } else {
@@ -140,10 +142,9 @@ app.post('/login', function (req, res) {
 
 app.use(function (req, res, next) {
   if (req.cookies.auth) {
-    // const checkAuth = sha256.hmac(loginSecret, userNameAuth);
     try {
       const checkAuth = jwt.verify(req.cookies.auth, loginSecret);
-      console.log(checkAuth, 'checkAuth');
+      console.log(checkAuth, 'jwt.verify checkAuth');
       next();
     } catch (e) {
       res.clearCookie('auth');
