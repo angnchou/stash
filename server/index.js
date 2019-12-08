@@ -49,14 +49,12 @@ app.get('/googleauthtest', function (req, res) {
   const url = oauth2Client.generateAuthUrl({
     scope: 'email'
   });
-  console.log(url, 'url')
   res.redirect(url);
 })
 
 //authenticating user
 app.get('/stashgoogleauth', function (req, res) {
   const code = req.query.code;
-  console.log(code, 'codeeeee')
   oauth2Client.getToken(code)
     .then(tokens => {
       oauth2Client.setCredentials(tokens);
@@ -73,13 +71,12 @@ app.get('/stashgoogleauth', function (req, res) {
         })
     })
     .catch(err => {
-      console.log(err, 'CAUGHTERRRR');
+      console.log(err, 'google auth error!');
     })
 })
 
 
 //parse auth
-
 const parseUser = (str) => {
   const index = str.indexOf('_');
   return str.slice(0, index);
@@ -94,7 +91,6 @@ app.get('/logout', function (req, res) {
   res.clearCookie('auth');
   res.redirect('/login');
 })
-
 
 app.get('/login', function (req, res) {
   const username = req.cookies.username;
@@ -130,7 +126,6 @@ app.post('/login', function (req, res) {
       // const checkAuth = sha256.hmac(loginSecret, req.body.username);
       const jwtAuth = jwt.sign({ username: req.body.username }, loginSecret);
       res.cookie('auth', jwtAuth);
-
       res.redirect('/');
     } else {
       req.session.err = 'Incorrect password, try again!';
@@ -144,7 +139,6 @@ app.use(function (req, res, next) {
   if (req.cookies.auth) {
     try {
       const checkAuth = jwt.verify(req.cookies.auth, loginSecret);
-      console.log(checkAuth, 'jwt.verify checkAuth');
       next();
     } catch (e) {
       res.clearCookie('auth');
@@ -163,7 +157,6 @@ app.get('/', function (req, res) {
 app.get('/items', function (req, res) {
   db.selectAll((err, data) => {
     if (err) {
-      console.log(err, 'ERR SERVER');
       res.status(500).send(err);
     } else {
       res.send(data);
@@ -182,7 +175,6 @@ app.post('/items/api', function (req, res) {
         req.body.notes,
         (err, newId) => {
           if (err) {
-            console.log(err, 'ERR server');
             res.status(500).send(err);
           } else {
             res.status(200).send({ success: true });
@@ -223,7 +215,6 @@ app.post('/items', function (req, res) {
 app.patch('/items/:id', (req, res) => {
   db.update(req.params.id, req.body, (err, data) => {
     if (err) {
-      console.log(err, 'ERR server');
       res.status(500).send(err);
     } else {
       res.json(data);

@@ -4,6 +4,7 @@ head
   title Stash Login Pug
   link(rel="stylesheet" type="text/css" href="/style.css")
   include /clientID.pug
+  script(src="https://apis.google.com/js/platform.js")
 
 body  
   h2="Login to See Your Stash"
@@ -15,7 +16,9 @@ body
       input(type="submit" name="submit")
       div
         input(type="checkbox" id="remember-me" name="rememberMe")
-        label(for="remember-me" class="checkbox-label")="Remember me"
-        script(src="https://apis.google.com/js/platform.js")
-      div(class="g-signin2" data-onsuccess="onSignIn")
+        label(for="remember-me" class="checkbox-label")="Remember me"      
+      script(src="/google-sign-in.js")
+      div(class="g-signin2" data-onsuccess="onSignIn" id="googleButton")
+       
+        
     
