@@ -5,6 +5,7 @@ head
   link(rel="stylesheet" type="text/css" href="/style.css")
   include /clientID.pug
   script(src="https://apis.google.com/js/platform.js")
+  script(src="https://apis.google.com/js/client:platform.js?onload=start")
 
 body  
   h2="Login to See Your Stash"
@@ -17,8 +18,6 @@ body
       div
         input(type="checkbox" id="remember-me" name="rememberMe")
         label(for="remember-me" class="checkbox-label")="Remember me"      
-      script(src="/google-sign-in.js")
-      div(class="g-signin2" data-onsuccess="onSignIn" id="googleButton")
-       
-        
-    
+  div(id="my-signin2" data-onsuccess="onSignIn")
+    a(href="/googleauthtest")
+      img(src="/btn_gsignin_light_focus_web_stash.png" alt="buttonGoogle")
