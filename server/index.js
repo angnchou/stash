@@ -64,7 +64,7 @@ app.get('/stashgoogleauth', function (req, res) {
       })
         .then(({ payload }) => {
           if (payload.email_verified && payload.email) {
-            const oauthCookie = jwt.sign({ username: req.body.username, email: payload.email }, loginSecret);
+            const oauthCookie = jwt.sign({ username: req.body.email, email: payload.email }, loginSecret);
             console.log(oauthCookie, 'OATH 68')
             res.cookie('auth', oauthCookie);
           }
@@ -94,41 +94,36 @@ app.get('/logout', function (req, res) {
 })
 
 app.get('/login', function (req, res) {
-  const username = req.cookies.username;
+  const user = req.cookies.email;
   if (req.session.err) {
     const msg = req.session.err;
     req.session.err = '';
-    res.render('login', { error: msg, username: username });
+    res.render('login', { error: msg, email: user });
   } else {
-    res.render('login', { username: username });
+    res.render('login', { email: user });
   }
 })
 
 app.post('/createaccount', function (req, res) {
   const pw = req.body.password;
-  const user = req.body.username;
+  const user = req.body.email;
   const pwconfirm = req.body.passwordconfirm;
-  console.log(pwconfirm, "USER")
   if (!pw || !user || !pwconfirm) {
     req.session.err = "All fields are required!"
   }
-  if (pwconfirm === pw) {
-    console.log('pw === pwconfirm')
-
+  if (pwconfirm === pw && pw.length > 0) {
     db.findUser(user, (err, data) => {
       if (err) {
         res.status(500).send('db problem :(')
       } else if (data === null) {
         //db createAccount
-        // const jwtAuth = jwt.sign({ username: req.body.username }, loginSecret);
         const hashedPassword = sha256.hmac(loginSecret, pw);
-        console.log('FIND SER SERVER 123')
         db.createAccount(user, hashedPassword, (err, data) => {
           if (err) {
             res.status(500).send('db problem - cannot create user :(')
           } else {
             //if successfully create account, create auth cookie and log user in
-            const jwtAuth = jwt.sign({ username: user }, loginSecret);
+            const jwtAuth = jwt.sign({ email: user }, loginSecret);
             res.cookie('auth', jwtAuth);
             res.redirect('/');
           }
@@ -146,10 +141,10 @@ app.post('/createaccount', function (req, res) {
 
 app.post('/login', function (req, res) {
   const pw = req.body.password;
-  const user = req.body.username;
+  const user = req.body.email;
 
   if (!pw || !user) {
-    req.session.err = 'Username and password are required!';
+    req.session.err = 'Email and password are required!';
     res.redirect('/login');
     return;
   }
@@ -162,10 +157,10 @@ app.post('/login', function (req, res) {
       res.redirect('/login');
     } else if (checkHash === data) {
       if (req.body.rememberMe === 'on') {
-        res.cookie('username', req.body.username);
+        res.cookie('email', req.body.email);
       }
       // const checkAuth = sha256.hmac(loginSecret, req.body.username);
-      const jwtAuth = jwt.sign({ username: req.body.username }, loginSecret);
+      const jwtAuth = jwt.sign({ email: user }, loginSecret);
       res.cookie('auth', jwtAuth);
       res.redirect('/');
     } else {

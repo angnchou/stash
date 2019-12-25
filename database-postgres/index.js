@@ -26,13 +26,13 @@ const findUser = (username, cb) => {
     } else if (result.rows.length === 0) {
       cb(null, null);
     } else if (result.rows.length === 1) {
-      cb(err, reslt.rows[0]);
+      cb(err, result.rows[0]);
     }
   })
 }
 
 const createAccount = (username, hashedPassword, cb) => {
-  client.query(`INSERT INTO users (username, password_hash) VALUES ('${username}', '${hashedPassword})'`, (err, result) => {
+  client.query(`INSERT INTO users (username, password_hash) VALUES ('${username}', '${hashedPassword}')`, (err, result) => {
     if (err) {
       console.log(err, "CREATE ERR DB")
       cb(err, null);
