@@ -130,3 +130,19 @@ input {
   display: flex;
   justify-content: space-between;
 }
+
+.login {
+  margin:5px;
+}
+
+.loginbottom {
+  display: flex;
+  justify-content: space-between;
+  flex-direction: column;
+  padding-top: 20px;
+}
+
+.account {
+  width: 500px;
+  height: 800px;
+}

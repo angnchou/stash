@@ -3,7 +3,6 @@ doctype html
 head  
   title Stash Login Pug
   link(rel="stylesheet" type="text/css" href="/style.css")
-  include /clientID.pug
   script(src="https://apis.google.com/js/platform.js")
   script(src="https://apis.google.com/js/client:platform.js?onload=start")
 
@@ -18,6 +17,13 @@ body
       div
         input(type="checkbox" id="remember-me" name="rememberMe")
         label(for="remember-me" class="checkbox-label")="Remember me"      
-  div(id="my-signin2" data-onsuccess="onSignIn")
-    a(href="/googleauthtest")
-      img(src="/btn_gsignin_light_focus_web_stash.png" alt="buttonGoogle")
+  
+  div(class="loginbottom")
+    
+    div(id="my-signin2" data-onsuccess="onSignIn")
+      a(href="/googleauthtest")
+        img(src="/btn_gsignin_light_focus_web_stash.png" alt="buttonGoogle")
+    div(id="createaccont" class="login")
+      a(href="/createaccount")="Create account"
+    div(id="resetPassword" class="login")
+      a(href="/resetpassword")="Forgot your password?"

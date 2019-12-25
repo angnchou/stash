@@ -1,8 +1,8 @@
 const express = require('express');
 const app = express();
 const { google } = require('googleapis');
-const clientID = require('./clientID');
-const clientSecret = require('./clientSecret');
+const clientID = process.env.clientID || require('./clientID');
+const clientSecret = process.env.clientSecret || require('./clientSecret');
 const path = require('path');
 
 const bodyParser = require('body-parser');
@@ -65,6 +65,7 @@ app.get('/stashgoogleauth', function (req, res) {
         .then(({ payload }) => {
           if (payload.email_verified && payload.email) {
             const oauthCookie = jwt.sign({ username: req.body.username, email: payload.email }, loginSecret);
+            console.log(oauthCookie, 'OATH 68')
             res.cookie('auth', oauthCookie);
           }
           res.redirect('/');
@@ -103,6 +104,46 @@ app.get('/login', function (req, res) {
   }
 })
 
+app.post('/createaccount', function (req, res) {
+  const pw = req.body.password;
+  const user = req.body.username;
+  const pwconfirm = req.body.passwordconfirm;
+  console.log(pwconfirm, "USER")
+  if (!pw || !user || !pwconfirm) {
+    req.session.err = "All fields are required!"
+  }
+  if (pwconfirm === pw) {
+    console.log('pw === pwconfirm')
+
+    db.findUser(user, (err, data) => {
+      if (err) {
+        res.status(500).send('db problem :(')
+      } else if (data === null) {
+        //db createAccount
+        // const jwtAuth = jwt.sign({ username: req.body.username }, loginSecret);
+        const hashedPassword = sha256.hmac(loginSecret, pw);
+        console.log('FIND SER SERVER 123')
+        db.createAccount(user, hashedPassword, (err, data) => {
+          if (err) {
+            res.status(500).send('db problem - cannot create user :(')
+          } else {
+            //if successfully create account, create auth cookie and log user in
+            const jwtAuth = jwt.sign({ username: user }, loginSecret);
+            res.cookie('auth', jwtAuth);
+            res.redirect('/');
+          }
+        })
+      } else if (data) {
+        req.session.err = "You already have an account"
+        res.redirect('/login');
+      }
+    })
+  } else {
+    req.session.err = "Password entered does not match confirmation, please try again!"
+    res.redirect('/createaccount');
+  }
+})
+
 app.post('/login', function (req, res) {
   const pw = req.body.password;
   const user = req.body.username;
@@ -133,6 +174,15 @@ app.post('/login', function (req, res) {
     }
   });
 });
+
+app.get('/resetpassword', function (req, res) {
+  console.log('reset')
+  res.render('resetPassword.pug');
+});
+
+app.get('/createaccount', function (req, res) {
+  res.render('createaccount.pug');
+})
 
 
 app.use(function (req, res, next) {

@@ -17,6 +17,32 @@ if (!process.env.DATABASE_URL) {
 }
 
 //check if hashed equalls what is stored in db
+
+const findUser = (username, cb) => {
+  client.query(`SELECT * FROM users where username = '${username}'`, (err, result) => {
+    if (err) {
+      console.log(err, "DB ERR")
+      cb(err);
+    } else if (result.rows.length === 0) {
+      cb(null, null);
+    } else if (result.rows.length === 1) {
+      cb(err, reslt.rows[0]);
+    }
+  })
+}
+
+const createAccount = (username, hashedPassword, cb) => {
+  client.query(`INSERT INTO users (username, password_hash) VALUES ('${username}', '${hashedPassword})'`, (err, result) => {
+    if (err) {
+      console.log(err, "CREATE ERR DB")
+      cb(err, null);
+    } else {
+      console.log(result, "createAcc db")
+      cb(null, result);
+    }
+  })
+}
+
 const login = (username, cb) => {
   client.query(`SELECT * FROM users WHERE username = '${username}'`, (err, result) => {
     if (err) {
@@ -90,6 +116,8 @@ const deleteBookmark = (id, cb) => {
 };
 
 module.exports = {
+  createAccount,
+  findUser,
   login,
   selectAll,
   add,
