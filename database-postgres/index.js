@@ -24,8 +24,10 @@ const findUser = (username, cb) => {
       console.log(err, "DB ERR")
       cb(err);
     } else if (result.rows.length === 0) {
+      console.log(result.rows.length, "DB 27");
       cb(null, null);
     } else if (result.rows.length === 1) {
+      console.log(result.rows[0], 'data dB')
       cb(err, result.rows[0]);
     }
   })

@@ -109,9 +109,18 @@ app.post('/createaccount', function (req, res) {
   const user = req.body.email;
   const pwconfirm = req.body.passwordconfirm;
   if (!pw || !user || !pwconfirm) {
-    req.session.err = "All fields are required!"
+    req.session.err = "All fields are required!";
+    res.redirect('/createaccount');
+    return;
   }
-  if (pwconfirm === pw && pw.length > 0) {
+  //email check; xx @ xxx . xxx
+  if (isEmailValid(user) === false) {
+    req.session.err = "Enter valid email!";
+    res.redirect('/createaccount');
+  } else if (pwconfirm !== pw || pw.length === 0) {
+    req.session.err = "Password entered does not match confirmation, please try again!";
+    res.redirect('/createaccount');
+  } else {
     db.findUser(user, (err, data) => {
       if (err) {
         res.status(500).send('db problem :(')
@@ -120,7 +129,7 @@ app.post('/createaccount', function (req, res) {
         const hashedPassword = sha256.hmac(loginSecret, pw);
         db.createAccount(user, hashedPassword, (err, data) => {
           if (err) {
-            res.status(500).send('db problem - cannot create user :(')
+            res.status(500).send('db problem - cannot create user :(');
           } else {
             //if successfully create account, create auth cookie and log user in
             const jwtAuth = jwt.sign({ email: user }, loginSecret);
@@ -133,11 +142,15 @@ app.post('/createaccount', function (req, res) {
         res.redirect('/login');
       }
     })
-  } else {
-    req.session.err = "Password entered does not match confirmation, please try again!"
-    res.redirect('/createaccount');
   }
 })
+
+//email validation
+function isEmailValid(email) {
+  let reg = /[\w\._\-]+@\w(\.\w)+/;
+  return reg.test(email);
+}
+
 
 app.post('/login', function (req, res) {
   const pw = req.body.password;
@@ -176,7 +189,9 @@ app.get('/resetpassword', function (req, res) {
 });
 
 app.get('/createaccount', function (req, res) {
-  res.render('createaccount.pug');
+  const error = req.session.err;
+  req.session.err = "";
+  res.render('createaccount.pug', { error: error });
 })
 
 
