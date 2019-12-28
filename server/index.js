@@ -1,8 +1,8 @@
 const express = require('express');
 const app = express();
 const { google } = require('googleapis');
-const clientID = process.env.clientID || require('./clientID');
-const clientSecret = process.env.clientSecret || require('./clientSecret');
+const clientID = process.env.CLIENT_ID || require('./clientID');
+const clientSecret = process.env.CLIENT_SECRET || require('./clientSecret');
 const path = require('path');
 
 const bodyParser = require('body-parser');
