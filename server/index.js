@@ -147,7 +147,7 @@ app.post('/createaccount', function (req, res) {
 
 //email validation
 function isEmailValid(email) {
-  let reg = /[\w\._\-]+@\w(\.\w)+/;
+  const reg = /[\w\._\-]+@\w+(\.\w)+/;
   return reg.test(email);
 }
 

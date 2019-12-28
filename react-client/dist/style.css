@@ -7,6 +7,7 @@ body {
   /* display: flex; */
   align-content: center;
 }
+
   a,
   a:visited,
   a:hover,
@@ -14,6 +15,9 @@ body {
     color: #484848;
 }
 
+.stashhome a, a:visited {
+  color: #ebd735;
+}
 
 
 .actionBar {
@@ -35,7 +39,7 @@ body {
   cursor: pointer;
 }
 
-h1 {
+h1, .StashHome {
   color: #ebd735;
 }
 .form {
@@ -144,5 +148,5 @@ input {
 
 .account {
   width: 500px;
-  height: 800px;
+  height: 500px;
 }
