@@ -3,6 +3,7 @@ const app = express();
 const { google } = require('googleapis');
 const clientID = process.env.CLIENT_ID || require('./clientID');
 const clientSecret = process.env.CLIENT_SECRET || require('./clientSecret');
+
 const path = require('path');
 
 const bodyParser = require('body-parser');
@@ -20,6 +21,10 @@ const session = require('express-session');
 const cookieParser = require('cookie-parser');
 
 const jwt = require('jsonwebtoken');
+
+const sendGridApi = process.env.SENDGRIDAPI || require('./sendGridApi.js');
+const sendGrid = require('@sendgrid/mail');
+sendGrid.setApiKey(sendGridApi);
 
 const { OAuth2Client } = require('google-auth-library');
 const client = new OAuth2Client(clientID);
@@ -114,7 +119,7 @@ app.post('/createaccount', function (req, res) {
     return;
   }
   //email check; xx @ xxx . xxx
-  if (isEmailValid(user) === false) {
+  if (!isEmailValid(user)) {
     req.session.err = "Enter valid email!";
     res.redirect('/createaccount');
   } else if (pwconfirm !== pw || pw.length === 0) {
@@ -184,9 +189,37 @@ app.post('/login', function (req, res) {
 });
 
 app.get('/resetpassword', function (req, res) {
-  console.log('reset')
-  res.render('resetPassword.pug');
+  const msg = req.session.message;
+  if (req.session.message) {
+    res.render('resetpassword.pug', { message: msg });
+    req.session.message = "";
+  } else {
+    res.render('resetpassword.pug');
+  }
+
+
 });
+
+app.post('/resetpassword', function (req, res) {
+  const resetEmail = {
+    to: 'angelanchou@gmail.com',
+    from: 'admin@stash.com',
+    subject: 'Reset Your Password',
+    text: 'Click the link below to reset your password',
+    html: '<h2>Click the link below to reset your password: </h2><br/>'
+      + '<a href="https://thawing-stream-77872.herokuapp.com/newpassword" target="_blank">'
+      + 'https://thawing-stream-77872.herokuapp.com/newpassword'
+      + '</a>'
+  }
+  sendGrid.send(resetEmail);
+  req.session.message = "Check your inbox";
+  res.redirect('/resetpassword');
+
+})
+
+app.get('/newpassword', function (req, res) {
+  res.render('newPassword.pug');
+})
 
 app.get('/createaccount', function (req, res) {
   const error = req.session.err;
