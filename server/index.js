@@ -26,6 +26,8 @@ const sendGridApi = process.env.SENDGRIDAPI || require('./sendGridApi.js');
 const sendGrid = require('@sendgrid/mail');
 sendGrid.setApiKey(sendGridApi);
 
+const resetPasswordSecret = process.env.RESETPASSWORDSECRET || require('./resetPasswordSecret.js')
+
 const { OAuth2Client } = require('google-auth-library');
 const client = new OAuth2Client(clientID);
 
@@ -118,7 +120,8 @@ app.post('/createaccount', function (req, res) {
     res.redirect('/createaccount');
     return;
   }
-  //email check; xx @ xxx . xxx
+  //email check
+  //TODO password check
   if (!isEmailValid(user)) {
     req.session.err = "Enter valid email!";
     res.redirect('/createaccount');
@@ -169,6 +172,7 @@ app.post('/login', function (req, res) {
   const checkHash = sha256.hmac(loginSecret, pw);
   db.login(user, (err, data) => {
     if (err) {
+      console.log(err);
       res.status(500).send('db problem :(');
     } else if (data === null) {
       req.session.err = 'User not found!';
@@ -196,29 +200,75 @@ app.get('/resetpassword', function (req, res) {
   } else {
     res.render('resetpassword.pug');
   }
-
-
 });
 
+//send email with link that contains reset password secret and user email 
 app.post('/resetpassword', function (req, res) {
-  const resetEmail = {
-    to: 'angelanchou@gmail.com',
-    from: 'admin@stash.com',
-    subject: 'Reset Your Password',
-    text: 'Click the link below to reset your password',
-    html: '<h2>Click the link below to reset your password: </h2><br/>'
-      + '<a href="https://thawing-stream-77872.herokuapp.com/newpassword" target="_blank">'
-      + 'https://thawing-stream-77872.herokuapp.com/newpassword'
-      + '</a>'
+  const email = req.body.email;
+  if (!isEmailValid(email)) {
+    res.render('resetPassword.pug', { message: 'Please enter your email' })
+  } else {
+    const hashedResetpassword = sha256.hmac(resetPasswordSecret, email);
+    const resetEmail = {
+      to: email,
+      from: 'admin@stash.com',
+      subject: 'Reset Your Password',
+      text: 'Click the link below to reset your password',
+      html: '<h2>Click the link below to reset your password: </h2><br/>'
+        + `<a href="http://localhost:8000/newpassword?action=${hashedResetpassword}&user=${email}" target="_blank">`
+        + `http://localhost:8000/newpassword?action=${hashedResetpassword}&user=${email}"`
+        + '</a>'
+    }
+    sendGrid.send(resetEmail);
+    req.session.message = "Check your inbox";
+    res.redirect('/resetpassword');
   }
-  sendGrid.send(resetEmail);
-  req.session.message = "Check your inbox";
-  res.redirect('/resetpassword');
-
 })
 
+//verify 
 app.get('/newpassword', function (req, res) {
-  res.render('newPassword.pug');
+  const user = req.query.user;
+  const action = req.query.action;
+  if (!user || !action) {
+    res.render('resetPassword.pug')
+  }
+  const verifyAccount = sha256.hmac(resetPasswordSecret, user);
+  if (action !== verifyAccount) {
+    res.redirect('/resetpassword');
+  } else {
+    res.render('newPassword.pug', { user: req.query.user, action: req.query.action });
+  }
+})
+
+//verify link and check for user in db then update user pw based on user in link
+app.post('/newpassword', function (req, res) {
+  const user = req.body.user;
+  const newPassword = req.body.newPassword;
+  const confirmPassword = req.body.confirmPassword;
+  //TODO add password validation
+  if (newPassword !== confirmPassword || newPassword.length === 0) {
+    res.render('newPassword.pug', { error: 'New password does not match confirmation. Try again.' });
+  } else {
+    db.findUser(user, (err, data) => {
+      if (err) {
+        res.status(500).send('Error: newpassword user not found in db')
+      } else if (data === null) {
+        res.status(500);
+        res.render('login.pug', { error: 'Error: no user found' });
+      } else if (data) {
+        const hashedNewPw = sha256.hmac(loginSecret, newPassword);
+        db.resetPassword(hashedNewPw, user, (err, data) => {
+          if (err) {
+            res.status(500).send('cannot reset password. Db error :(');
+          } else {
+            res.status(200);
+            req.session.err = 'log in using your new password'
+            res.redirect('/login');
+          }
+        })
+      }
+    })
+  }
 })
 
 app.get('/createaccount', function (req, res) {

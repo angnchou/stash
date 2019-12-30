@@ -16,18 +16,14 @@ if (!process.env.DATABASE_URL) {
   client.connect();
 }
 
-//check if hashed equalls what is stored in db
-
 const findUser = (username, cb) => {
+  console.log(username, 'USERNAME DB 22')
   client.query(`SELECT * FROM users where username = '${username}'`, (err, result) => {
     if (err) {
-      console.log(err, "DB ERR")
       cb(err);
     } else if (result.rows.length === 0) {
-      console.log(result.rows.length, "DB 27");
       cb(null, null);
     } else if (result.rows.length === 1) {
-      console.log(result.rows[0], 'data dB')
       cb(err, result.rows[0]);
     }
   })
@@ -36,10 +32,19 @@ const findUser = (username, cb) => {
 const createAccount = (username, hashedPassword, cb) => {
   client.query(`INSERT INTO users (username, password_hash) VALUES ('${username}', '${hashedPassword}')`, (err, result) => {
     if (err) {
-      console.log(err, "CREATE ERR DB")
       cb(err, null);
     } else {
-      console.log(result, "createAcc db")
+      cb(null, result);
+    }
+  })
+}
+
+
+const resetPassword = (newPassword, user, cb) => {
+  client.query('UPDATE users SET password_hash = $1 WHERE username = $2', [newPassword, user], (err, result) => {
+    if (err) {
+      cb(err, null);
+    } else {
       cb(null, result);
     }
   })
@@ -108,7 +113,8 @@ const update = (id, data, cb) => {
 };
 
 const deleteBookmark = (id, cb) => {
-  client.query(`DELETE FROM bookmarks WHERE id=${id}`, (err, result) => {
+  //  client.query(`DELETE FROM bookmarks WHERE id=` + id, (err, result) => {
+  client.query(`DELETE FROM bookmarks WHERE id= ` + id, (err, result) => {
     if (err) {
       cb(err, null);
     } else {
@@ -120,6 +126,7 @@ const deleteBookmark = (id, cb) => {
 module.exports = {
   createAccount,
   findUser,
+  resetPassword,
   login,
   selectAll,
   add,

@@ -7,3 +7,4 @@ clientSecret.js
 apiKeys.js
 clientID.pug
 sendGridApi.js
+resetPasswordSecret.js
