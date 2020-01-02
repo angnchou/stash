@@ -132,7 +132,7 @@ app.post('/createaccount', function (req, res) {
     db.findUser(user, (err, data) => {
       if (err) {
         res.status(500).send('db problem :(')
-      } else if (data === null) {
+      } else if (data === null && !isPAsswordValid(pw)) {
         //db createAccount
         const hashedPassword = sha256.hmac(loginSecret, pw);
         db.createAccount(user, hashedPassword, (err, data) => {
@@ -145,6 +145,8 @@ app.post('/createaccount', function (req, res) {
             res.redirect('/');
           }
         })
+      } else if (isPAsswordValid(pw)) {
+        res.render('createAccount.pug', { error: isPAsswordValid(pw) });
       } else if (data) {
         req.session.err = "You already have an account"
         res.redirect('/login');
@@ -157,6 +159,33 @@ app.post('/createaccount', function (req, res) {
 function isEmailValid(email) {
   const reg = /[\w\._\-]+@\w+(\.\w)+/;
   return reg.test(email);
+}
+
+/*password validation:
+pw must be at least 8 chars, has 1 uppercase letter, 1 lowercase letter, 1 special char, and 1 number
+ascii code 65 - 90 A - Z, 97 - 122 a - z, 48 - 57 is zero - nine
+*/
+
+function isPAsswordValid(pw) {
+  const check = {};
+  if (pw.length < 8) {
+    return "Password needs to be at least 8 characters long";
+  }
+  for (var i = 0; i < pw.length; i++) {
+    if (pw.charCodeAt(i) >= 65 && pw.charCodeAt(i) <= 90) {
+      check.upper = true;
+    } else if (pw.charCodeAt(i) >= 97 && pw.charCodeAt(i) <= 122) {
+      check.lower = true
+    } else if (pw.charCodeAt(i) >= 48 && pw.charCodeAt(i) <= 57) {
+      check.num = true;
+    } else {
+      check.special = true;
+    }
+  }
+  if (Object.keys(check).length !== 4) {
+    return "Password must contain at least 1 uppercase letter, 1 lowercase letter, 1 special character, and 1 number"
+  }
+  return "";
 }
 
 
@@ -245,10 +274,9 @@ app.post('/newpassword', function (req, res) {
   const user = req.body.user;
   const newPassword = req.body.newPassword;
   const confirmPassword = req.body.confirmPassword;
-  //TODO add password validation
   if (newPassword !== confirmPassword || newPassword.length === 0) {
     res.render('newPassword.pug', { error: 'New password does not match confirmation. Try again.' });
-  } else {
+  } else if (!isPAsswordValid(newPassword)) {
     db.findUser(user, (err, data) => {
       if (err) {
         res.status(500).send('Error: newpassword user not found in db')
@@ -268,6 +296,8 @@ app.post('/newpassword', function (req, res) {
         })
       }
     })
+  } else {
+    res.render('newPassword.pug', { error: isPAsswordValid(newPassword) });
   }
 })
 
