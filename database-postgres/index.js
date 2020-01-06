@@ -18,7 +18,7 @@ if (!process.env.DATABASE_URL) {
 
 const findUser = (username, cb) => {
   console.log(username, 'USERNAME DB 22')
-  client.query(`SELECT * FROM users where username = '${username}'`, (err, result) => {
+  client.query('SELECT * FROM users where username = $1', [username], (err, result) => {
     if (err) {
       cb(err);
     } else if (result.rows.length === 0) {
@@ -30,7 +30,7 @@ const findUser = (username, cb) => {
 }
 
 const createAccount = (username, hashedPassword, cb) => {
-  client.query(`INSERT INTO users (username, password_hash) VALUES ('${username}', '${hashedPassword}')`, (err, result) => {
+  client.query('INSERT INTO users (username, password_hash) VALUES ($1, $2)', [username, hashedPassword], (err, result) => {
     if (err) {
       cb(err, null);
     } else {
@@ -51,7 +51,7 @@ const resetPassword = (newPassword, user, cb) => {
 }
 
 const login = (username, cb) => {
-  client.query(`SELECT * FROM users WHERE username = '${username}'`, (err, result) => {
+  client.query('SELECT * FROM users WHERE username = $1', [username], (err, result) => {
     if (err) {
       cb(err, null);
     } else {
@@ -80,15 +80,14 @@ const selectAll = callback => {
 
 const add = (title, tags, category, url, notes, cb) => {
   client.query(
-    `INSERT INTO bookmarks (title, tags, category, url, notes) VALUES ('${title}', '${tags}', '${category}', '${url}', '${notes}')`,
+    'INSERT INTO bookmarks (title, tags, category, url, notes) VALUES ($1, $2, $3, $4, $5)', [title, tags, category, url, notes]),
     (err, result) => {
       if (err) {
         cb(err, null);
       } else {
         cb(null, result.insertId);
       }
-    }
-  );
+    };
 };
 
 const setImage = (id, img, cb) => {
