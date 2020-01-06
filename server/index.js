@@ -132,7 +132,7 @@ app.post('/createaccount', function (req, res) {
     db.findUser(user, (err, data) => {
       if (err) {
         res.status(500).send('db problem :(')
-      } else if (data === null && !isPAsswordValid(pw)) {
+      } else if (data === null && !isPasswordValid(pw)) {
         //db createAccount
         const hashedPassword = sha256.hmac(loginSecret, pw);
         db.createAccount(user, hashedPassword, (err, data) => {
@@ -145,8 +145,8 @@ app.post('/createaccount', function (req, res) {
             res.redirect('/');
           }
         })
-      } else if (isPAsswordValid(pw)) {
-        res.render('createAccount.pug', { error: isPAsswordValid(pw) });
+      } else if (isPasswordValid(pw)) {
+        res.render('createAccount.pug', { error: isPasswordValid(pw) });
       } else if (data) {
         req.session.err = "You already have an account"
         res.redirect('/login');
@@ -166,7 +166,7 @@ pw must be at least 8 chars, has 1 uppercase letter, 1 lowercase letter, 1 speci
 ascii code 65 - 90 A - Z, 97 - 122 a - z, 48 - 57 is zero - nine
 */
 
-function isPAsswordValid(pw) {
+function isPasswordValid(pw) {
   const check = {};
   if (pw.length < 8) {
     return "Password needs to be at least 8 characters long";
@@ -234,19 +234,21 @@ app.get('/resetpassword', function (req, res) {
 //send email with link that contains reset password secret and user email 
 app.post('/resetpassword', function (req, res) {
   const email = req.body.email;
+
   if (!isEmailValid(email)) {
     res.render('resetPassword.pug', { message: 'Please enter your email' })
   } else {
     const hashedResetpassword = sha256.hmac(resetPasswordSecret, email);
+    const linkCreatedTime = new Date().getTime();
+    const resetPasswordLink = `http://localhost:8000/newpassword?action=${hashedResetpassword}&user=${email}&valid=${linkCreatedTime}`;
+
     const resetEmail = {
       to: email,
       from: 'admin@stash.com',
       subject: 'Reset Your Password',
       text: 'Click the link below to reset your password',
       html: '<h2>Click the link below to reset your password: </h2><br/>'
-        + `<a href="http://localhost:8000/newpassword?action=${hashedResetpassword}&user=${email}" target="_blank">`
-        + `http://localhost:8000/newpassword?action=${hashedResetpassword}&user=${email}"`
-        + '</a>'
+        + `<a href="${resetPasswordLink}">${resetPasswordLink}</a>`
     }
     sendGrid.send(resetEmail);
     req.session.message = "Check your inbox";
@@ -256,16 +258,26 @@ app.post('/resetpassword', function (req, res) {
 
 //verify 
 app.get('/newpassword', function (req, res) {
-  const user = req.query.user;
-  const action = req.query.action;
+  const user = req.query.user;//undef
+  const action = req.query.action;//ndef
+  const valid = parseInt(req.query.valid);//NaN
+  const timeElapsed = (new Date().getTime() - valid) / 1000;//4
+
   if (!user || !action) {
-    res.render('resetPassword.pug')
-  }
-  const verifyAccount = sha256.hmac(resetPasswordSecret, user);
-  if (action !== verifyAccount) {
+    // go back to reset password
     res.redirect('/resetpassword');
+    return;
+  } // todo check signatre first, include checking timestamp
+  if (timeElapsed > 24 * 60 * 60) {
+    req.session.message = 'Reset password link expired. Get a new one!';
+    res.redirect('/resetpassword')
   } else {
-    res.render('newPassword.pug', { user: req.query.user, action: req.query.action });
+    const verifyAccount = sha256.hmac(resetPasswordSecret, user);
+    if (action !== verifyAccount) {
+      res.redirect('/resetpassword');
+    } else {
+      res.render('newPassword.pug', { user: req.query.user, action: req.query.action });
+    }
   }
 })
 
@@ -274,9 +286,17 @@ app.post('/newpassword', function (req, res) {
   const user = req.body.user;
   const newPassword = req.body.newPassword;
   const confirmPassword = req.body.confirmPassword;
+  const verifyAccount = sha256.hmac(resetPasswordSecret, user);
+  const action = req.body.action;
+  //TODO factor out reset password link verification to its own function
+  if (action !== verifyAccount) {
+    req.session.message = 'Get a new link :P';
+    res.redirect('/resetpassword');
+    return;
+  }
   if (newPassword !== confirmPassword || newPassword.length === 0) {
-    res.render('newPassword.pug', { error: 'New password does not match confirmation. Try again.' });
-  } else if (!isPAsswordValid(newPassword)) {
+    res.render('newPassword.pug', { error: 'New password does not match confirmation. Try again.', user: user, action: action });
+  } else if (!isPasswordValid(newPassword)) {
     db.findUser(user, (err, data) => {
       if (err) {
         res.status(500).send('Error: newpassword user not found in db')
@@ -297,7 +317,7 @@ app.post('/newpassword', function (req, res) {
       }
     })
   } else {
-    res.render('newPassword.pug', { error: isPAsswordValid(newPassword) });
+    res.render('newPassword.pug', { error: isPasswordValid(newPassword) });
   }
 })
 
