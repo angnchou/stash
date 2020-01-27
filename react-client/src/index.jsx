@@ -33,7 +33,7 @@ class App extends React.Component {
   }
 
   logOut() {
-    location = '/logout'
+    window.location = '/logout'
   }
 
   clearForm() {
@@ -123,8 +123,6 @@ class App extends React.Component {
   }
 
   selectCategory(event) {
-    console.log(typeof event.target.value);
-    console.log(event.target.value);
     this.setState({
       currentCategory: event.target.value,
     });

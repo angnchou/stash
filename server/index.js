@@ -72,7 +72,6 @@ app.get('/stashgoogleauth', function (req, res) {
         .then(({ payload }) => {
           if (payload.email_verified && payload.email) {
             const oauthCookie = jwt.sign({ username: req.body.email, email: payload.email }, loginSecret);
-            console.log(oauthCookie, 'OATH 68')
             res.cookie('auth', oauthCookie);
           }
           res.redirect('/');
@@ -165,7 +164,6 @@ function isEmailValid(email) {
 pw must be at least 8 chars, has 1 uppercase letter, 1 lowercase letter, 1 special char, and 1 number
 ascii code 65 - 90 A - Z, 97 - 122 a - z, 48 - 57 is zero - nine
 */
-
 function isPasswordValid(pw) {
   const check = {};
   if (pw.length < 8) {
@@ -187,7 +185,6 @@ function isPasswordValid(pw) {
   }
   return "";
 }
-
 
 app.post('/login', function (req, res) {
   const pw = req.body.password;
@@ -222,13 +219,7 @@ app.post('/login', function (req, res) {
 });
 
 app.get('/resetpassword', function (req, res) {
-  const msg = req.session.message;
-  if (req.session.message) {
-    res.render('resetpassword.pug', { message: msg });
-    req.session.message = "";
-  } else {
-    res.render('resetpassword.pug');
-  }
+  res.render('resetpassword.pug', { message: req.session.message });
 });
 
 //send email with link that contains reset password secret and user email 
@@ -238,8 +229,8 @@ app.post('/resetpassword', function (req, res) {
   if (!isEmailValid(email)) {
     res.render('resetPassword.pug', { message: 'Please enter your email' })
   } else {
-    const hashedResetpassword = sha256.hmac(resetPasswordSecret, email);
     const linkCreatedTime = new Date().getTime();
+    const hashedResetpassword = sha256.hmac(resetPasswordSecret, `${email}${linkCreatedTime}`);
     const resetPasswordLink = `http://localhost:8000/newpassword?action=${hashedResetpassword}&user=${email}&valid=${linkCreatedTime}`;
 
     const resetEmail = {
@@ -249,10 +240,12 @@ app.post('/resetpassword', function (req, res) {
       text: 'Click the link below to reset your password',
       html: '<h2>Click the link below to reset your password: </h2><br/>'
         + `<a href="${resetPasswordLink}">${resetPasswordLink}</a>`
+        + `<h4>The reset password link expires in 24 hours. If the link has expired, you can request a new one ` + `<a href="http://localhost:8000/resetpassword">here</a></h4>`
     }
     sendGrid.send(resetEmail);
-    req.session.message = "Check your inbox";
-    res.redirect('/resetpassword');
+    const msg = "Check your inbox";
+    res.render('resetpassword.pug', { message: msg });
+    req.session.message = "";
   }
 })
 
@@ -267,16 +260,16 @@ app.get('/newpassword', function (req, res) {
     // go back to reset password
     res.redirect('/resetpassword');
     return;
-  } // todo check signatre first, include checking timestamp
+  } // todo check signature timestamp 
   if (timeElapsed > 24 * 60 * 60) {
     req.session.message = 'Reset password link expired. Get a new one!';
     res.redirect('/resetpassword')
   } else {
-    const verifyAccount = sha256.hmac(resetPasswordSecret, user);
+    const verifyAccount = sha256.hmac(resetPasswordSecret, `${user}${valid}`);
     if (action !== verifyAccount) {
       res.redirect('/resetpassword');
     } else {
-      res.render('newPassword.pug', { user: req.query.user, action: req.query.action });
+      res.render('newPassword.pug', { user: req.query.user, action: req.query.action, linkCreatedTime: req.query.valid });
     }
   }
 })
@@ -286,7 +279,9 @@ app.post('/newpassword', function (req, res) {
   const user = req.body.user;
   const newPassword = req.body.newPassword;
   const confirmPassword = req.body.confirmPassword;
-  const verifyAccount = sha256.hmac(resetPasswordSecret, user);
+  const linkCreatedTime = req.body.linkCreatedTime;
+
+  const verifyAccount = sha256.hmac(resetPasswordSecret, `${user}${linkCreatedTime}`);
   const action = req.body.action;
   //TODO factor out reset password link verification to its own function
   if (action !== verifyAccount) {
@@ -377,7 +372,6 @@ app.post('/items/api', function (req, res) {
     })
     .catch(err => {
       console.log(err, 'ERR');
-
       res.status(500).send(err);
     });
 });
