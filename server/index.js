@@ -219,7 +219,7 @@ app.post('/login', function (req, res) {
 });
 
 app.get('/resetpassword', function (req, res) {
-  res.render('resetpassword.pug', { message: req.session.message });
+  res.render('resetPassword.pug', { message: req.session.message });
 });
 
 //send email with link that contains reset password secret and user email 
