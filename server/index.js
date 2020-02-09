@@ -48,7 +48,7 @@ app.use(session({ secret: 'hoi', resave: false, saveUninitialized: false }));
 const oauth2Client = new google.auth.OAuth2(
   clientID,
   clientSecret,
-  'http://localhost:8000/stashgoogleauth'
+  '/stashgoogleauth'
 );
 
 //kicks off oauth flow
