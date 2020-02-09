@@ -231,7 +231,7 @@ app.post('/resetpassword', function (req, res) {
   } else {
     const linkCreatedTime = new Date().getTime();
     const hashedResetpassword = sha256.hmac(resetPasswordSecret, `${email}${linkCreatedTime}`);
-    const resetPasswordLink = `http://localhost:8000/newpassword?action=${hashedResetpassword}&user=${email}&valid=${linkCreatedTime}`;
+    const resetPasswordLink = `https://thawing-stream-77872.herokuapp.com/newpassword?action=${hashedResetpassword}&user=${email}&valid=${linkCreatedTime}`;
 
     const resetEmail = {
       to: email,
@@ -240,7 +240,7 @@ app.post('/resetpassword', function (req, res) {
       text: 'Click the link below to reset your password',
       html: '<h2>Click the link below to reset your password: </h2><br/>'
         + `<a href="${resetPasswordLink}">${resetPasswordLink}</a>`
-        + `<h4>The reset password link expires in 24 hours. If the link has expired, you can request a new one ` + `<a href="http://localhost:8000/resetpassword">here</a></h4>`
+        + `<h4>The reset password link expires in 24 hours. If the link has expired, you can request a new one ` + `<a href="https://thawing-stream-77872.herokuapp.com/resetpassword">here</a></h4>`
     }
     sendGrid.send(resetEmail);
     const msg = "Check your inbox";
