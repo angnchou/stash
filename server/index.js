@@ -244,7 +244,7 @@ app.post('/resetpassword', function (req, res) {
     }
     sendGrid.send(resetEmail);
     const msg = "Check your inbox";
-    res.render('resetpassword.pug', { message: msg });
+    res.render('resetPassword.pug', { message: msg });
     req.session.message = "";
   }
 })
