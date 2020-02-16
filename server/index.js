@@ -4,6 +4,8 @@ const { google } = require('googleapis');
 const clientID = process.env.CLIENT_ID || require('./clientID');
 const clientSecret = process.env.CLIENT_SECRET || require('./clientSecret');
 
+const app_URL = process.env.deployed_URL || 'https://localhost:8000';
+
 const path = require('path');
 
 const bodyParser = require('body-parser');
@@ -48,7 +50,7 @@ app.use(session({ secret: 'hoi', resave: false, saveUninitialized: false }));
 const oauth2Client = new google.auth.OAuth2(
   clientID,
   clientSecret,
-  'https://thawing-stream-77872.herokuapp.com/stashgoogleauth'
+  app_URL + '/stashgoogleauth'
 );
 
 //kicks off oauth flow
@@ -231,7 +233,7 @@ app.post('/resetpassword', function (req, res) {
   } else {
     const linkCreatedTime = new Date().getTime();
     const hashedResetpassword = sha256.hmac(resetPasswordSecret, `${email}${linkCreatedTime}`);
-    const resetPasswordLink = `https://thawing-stream-77872.herokuapp.com/newpassword?action=${hashedResetpassword}&user=${email}&valid=${linkCreatedTime}`;
+    const resetPasswordLink = app_URL + `/newpassword?action=${hashedResetpassword}&user=${email}&valid=${linkCreatedTime}`;
 
     const resetEmail = {
       to: email,
@@ -240,7 +242,7 @@ app.post('/resetpassword', function (req, res) {
       text: 'Click the link below to reset your password',
       html: '<h2>Click the link below to reset your password: </h2><br/>'
         + `<a href="${resetPasswordLink}">${resetPasswordLink}</a>`
-        + `<h4>The reset password link expires in 24 hours. If the link has expired, you can request a new one ` + `<a href="https://thawing-stream-77872.herokuapp.com/resetpassword">here</a></h4>`
+        + `<h4>The reset password link expires in 24 hours. If the link has expired, you can request a new one ` + `<a href="${app_URL}/resetpassword">here</a></h4>`
     }
     sendGrid.send(resetEmail);
     const msg = "Check your inbox";
