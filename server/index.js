@@ -4,7 +4,7 @@ const { google } = require('googleapis');
 const clientID = process.env.CLIENT_ID || require('./clientID');
 const clientSecret = process.env.CLIENT_SECRET || require('./clientSecret');
 
-const app_URL = process.env.deployed_URL || 'https://localhost:8000';
+const app_URL = process.env.deployed_URL || 'http://localhost:8000';
 
 const path = require('path');
 
@@ -73,7 +73,8 @@ app.get('/stashgoogleauth', function (req, res) {
       })
         .then(({ payload }) => {
           if (payload.email_verified && payload.email) {
-            const oauthCookie = jwt.sign({ username: req.body.email, email: payload.email }, loginSecret);
+            // const oauthCookie = jwt.sign({ username: req.body.email, email: payload.email }, loginSecret);
+            const oauthCookie = jwt.sign({ email: payload.email }, loginSecret);
             res.cookie('auth', oauthCookie);
           }
           res.redirect('/');
@@ -122,7 +123,6 @@ app.post('/createaccount', function (req, res) {
     return;
   }
   //email check
-  //TODO password check
   if (!isEmailValid(user)) {
     req.session.err = "Enter valid email!";
     res.redirect('/createaccount');
@@ -136,12 +136,13 @@ app.post('/createaccount', function (req, res) {
       } else if (data === null && !isPasswordValid(pw)) {
         //db createAccount
         const hashedPassword = sha256.hmac(loginSecret, pw);
+        //db.createAccont returns user id
         db.createAccount(user, hashedPassword, (err, data) => {
           if (err) {
             res.status(500).send('db problem - cannot create user :(');
           } else {
             //if successfully create account, create auth cookie and log user in
-            const jwtAuth = jwt.sign({ email: user }, loginSecret);
+            const jwtAuth = jwt.sign({ email: user, userId: data.rows[0].id }, loginSecret);
             res.cookie('auth', jwtAuth);
             res.redirect('/');
           }
@@ -198,19 +199,18 @@ app.post('/login', function (req, res) {
     return;
   }
   const checkHash = sha256.hmac(loginSecret, pw);
-  db.login(user, (err, data) => {
+  db.login(user, (err, hashedPw, userId) => {
     if (err) {
-      console.log(err);
       res.status(500).send('db problem :(');
-    } else if (data === null) {
+    } else if (userId === null) {
       req.session.err = 'User not found!';
       res.redirect('/login');
-    } else if (checkHash === data) {
+    } else if (checkHash === hashedPw) {
       if (req.body.rememberMe === 'on') {
         res.cookie('email', req.body.email);
       }
       // const checkAuth = sha256.hmac(loginSecret, req.body.username);
-      const jwtAuth = jwt.sign({ email: user }, loginSecret);
+      const jwtAuth = jwt.sign({ email: user, userId: userId }, loginSecret);
       res.cookie('auth', jwtAuth);
       res.redirect('/');
     } else {
@@ -345,7 +345,10 @@ app.get('/', function (req, res) {
 
 
 app.get('/items', function (req, res) {
-  db.selectAll((err, data) => {
+  const checkAuthCookie = jwt.verify(req.cookies.auth, loginSecret);
+  const userId = checkAuthCookie.userId;
+
+  db.selectAll(userId, (err, data) => {
     if (err) {
       res.status(500).send(err);
     } else {
@@ -373,7 +376,6 @@ app.post('/items/api', function (req, res) {
       );
     })
     .catch(err => {
-      console.log(err, 'ERR');
       res.status(500).send(err);
     });
 });

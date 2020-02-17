@@ -17,24 +17,36 @@ if (!process.env.DATABASE_URL) {
 }
 
 const findUser = (username, cb) => {
-  console.log(username, 'USERNAME DB 22')
   client.query('SELECT * FROM users where username = $1', [username], (err, result) => {
     if (err) {
       cb(err);
     } else if (result.rows.length === 0) {
       cb(null, null);
     } else if (result.rows.length === 1) {
+      // console.log(result.rows[0].id, 'db 26 rows[0].id');
       cb(err, result.rows[0]);
     }
   })
 }
 
 const createAccount = (username, hashedPassword, cb) => {
-  client.query('INSERT INTO users (username, password_hash) VALUES ($1, $2)', [username, hashedPassword], (err, result) => {
+  client.query('INSERT INTO users (username, password_hash) VALUES ($1, $2) RETURNING id', [username, hashedPassword], (err, result) => {
     if (err) {
       cb(err, null);
     } else {
+      console.log(result.rows[0].id, 'db 37')
       cb(null, result);
+    }
+  })
+}
+
+const userId = (username, cb) => {
+  client.query('SELECT id from users WHERE username = $1', [username], (err, userId) => {
+    if (err) {
+      cb(err, null);
+    } else {
+      console.log(userId, 'db 48 result');
+      cb(null, userId)
     }
   })
 }
@@ -58,14 +70,15 @@ const login = (username, cb) => {
       if (result.rows.length === 0) {
         cb(null, null);
       } else {
-        cb(err, result.rows[0].password_hash);
+        console.log(result, 'db 73 login result')
+        cb(err, result.rows[0].password_hash, result.rows[0].id);
       }
     }
   });
 }
 
-const selectAll = callback => {
-  client.query('SELECT * FROM bookmarks', (err, results, fields) => {
+const selectAll = (userId, callback) => {
+  client.query('SELECT * FROM bookmarks WHERE user_id = $1', [userId], (err, results, fields) => {
     if (err) {
       callback(err, null);
     } else {
@@ -125,6 +138,7 @@ const deleteBookmark = (id, cb) => {
 module.exports = {
   createAccount,
   findUser,
+  userId,
   resetPassword,
   login,
   selectAll,
