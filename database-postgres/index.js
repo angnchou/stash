@@ -40,7 +40,7 @@ const createAccount = (username, hashedPassword, cb) => {
   })
 }
 
-const userId = (username, cb) => {
+const getUserId = (username, cb) => {
   client.query('SELECT id from users WHERE username = $1', [username], (err, userId) => {
     if (err) {
       cb(err, null);
@@ -92,15 +92,16 @@ const selectAll = (userId, callback) => {
 };
 
 const add = (title, tags, category, url, notes, cb) => {
-  client.query(
-    'INSERT INTO bookmarks (title, tags, category, url, notes) VALUES ($1, $2, $3, $4, $5)', [title, tags, category, url, notes]),
+  const statement = 'INSERT INTO bookmarks (title, tags, category, url, notes) VALUES ($1, $2, $3, $4, $5)';
+  const args = [title, tags, category, url, notes];
+  client.query(statement, args,
     (err, result) => {
       if (err) {
         cb(err, null);
       } else {
         cb(null, result.insertId);
       }
-    };
+    });
 };
 
 const setImage = (id, img, cb) => {
@@ -138,7 +139,7 @@ const deleteBookmark = (id, cb) => {
 module.exports = {
   createAccount,
   findUser,
-  userId,
+  getUserId,
   resetPassword,
   login,
   selectAll,

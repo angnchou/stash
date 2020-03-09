@@ -4,7 +4,7 @@ const { google } = require('googleapis');
 const clientID = process.env.CLIENT_ID || require('./clientID');
 const clientSecret = process.env.CLIENT_SECRET || require('./clientSecret');
 
-const app_URL = process.env.deployed_URL || 'http://localhost:8000';
+const app_URL = process.env.DEPLOYED_URL || 'http://localhost:8000';
 
 const path = require('path');
 
@@ -58,6 +58,7 @@ app.get('/googleauthtest', function (req, res) {
   const url = oauth2Client.generateAuthUrl({
     scope: 'email'
   });
+  //URL google redirects user to
   res.redirect(url);
 })
 
@@ -73,11 +74,18 @@ app.get('/stashgoogleauth', function (req, res) {
       })
         .then(({ payload }) => {
           if (payload.email_verified && payload.email) {
-            // const oauthCookie = jwt.sign({ username: req.body.email, email: payload.email }, loginSecret);
-            const oauthCookie = jwt.sign({ email: payload.email }, loginSecret);
-            res.cookie('auth', oauthCookie);
+            // query DB to get userID assuming email belongs to a user who has enabled oauth
+            db.getUserId(payload.email, (err, data) => {
+              if (err) {
+                res.status(500).send('db problem');
+              } else {
+                const oauthCookie = jwt.sign({ email: payload.email, userId: data.rows[0].id }, loginSecret);
+                // console.log(oauthCookie, 'cookie')
+                res.cookie('auth', oauthCookie);
+                res.redirect('/');
+              }
+            })
           }
-          res.redirect('/');
         })
     })
     .catch(err => {
@@ -360,6 +368,7 @@ app.post('/items/api', function (req, res) {
   diffApi
     .getInfo(req.body.url)
     .then(info => {
+      console.log(info, 'DIFFFAPI')
       db.add(
         info.title,
         req.body.tags,
