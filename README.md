@@ -1,8 +1,8 @@
 # mvp-Stash
 Stash is a bookmark management tool that lets you organize bookmarks by extracting page content of a URL.
 
-## Development
-Install Dependencies
+### Development
+####Install Dependencies
 From within the root directory:
 
 ```sh 
