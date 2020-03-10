@@ -155,3 +155,10 @@ input {
   width: 500px;
   height: 500px;
 }
+
+#user {
+  color: #484848;
+  display: flex;
+  justify-content: flex-end;
+  font-weight: bold;
+}

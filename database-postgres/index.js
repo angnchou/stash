@@ -17,35 +17,38 @@ if (!process.env.DATABASE_URL) {
 }
 
 const findUser = (username, cb) => {
-  client.query('SELECT * FROM users where username = $1', [username], (err, result) => {
+  const statement = 'SELECT * FROM users where username = $1';
+  const args = [username];
+  client.query(statement, args, (err, result) => {
     if (err) {
       cb(err);
     } else if (result.rows.length === 0) {
       cb(null, null);
     } else if (result.rows.length === 1) {
-      // console.log(result.rows[0].id, 'db 26 rows[0].id');
       cb(err, result.rows[0]);
     }
   })
 }
 
 const createAccount = (username, hashedPassword, cb) => {
-  client.query('INSERT INTO users (username, password_hash) VALUES ($1, $2) RETURNING id', [username, hashedPassword], (err, result) => {
+  const statement = 'INSERT INTO users (username, password_hash) VALUES ($1, $2) RETURNING id';
+  const args = [username, hashedPassword];
+  client.query(statement, args, (err, result) => {
     if (err) {
       cb(err, null);
     } else {
-      console.log(result.rows[0].id, 'db 37')
       cb(null, result);
     }
   })
 }
 
 const getUserId = (username, cb) => {
-  client.query('SELECT id from users WHERE username = $1', [username], (err, userId) => {
+  const statement = 'SELECT id from users WHERE username = $1';
+  const args = [username]
+  client.query(statement, args, (err, userId) => {
     if (err) {
       cb(err, null);
     } else {
-      console.log(userId, 'db 48 result');
       cb(null, userId)
     }
   })
@@ -53,7 +56,9 @@ const getUserId = (username, cb) => {
 
 
 const resetPassword = (newPassword, user, cb) => {
-  client.query('UPDATE users SET password_hash = $1 WHERE username = $2', [newPassword, user], (err, result) => {
+  const statement = 'UPDATE users SET password_hash = $1 WHERE username = $2';
+  const args = [newPassword, user];
+  client.query(statement, args, (err, result) => {
     if (err) {
       cb(err, null);
     } else {
@@ -63,14 +68,15 @@ const resetPassword = (newPassword, user, cb) => {
 }
 
 const login = (username, cb) => {
-  client.query('SELECT * FROM users WHERE username = $1', [username], (err, result) => {
+  const statement = 'SELECT * FROM users WHERE username = $1';
+  const args = [username];
+  client.query(statement, args, (err, result) => {
     if (err) {
       cb(err, null);
     } else {
       if (result.rows.length === 0) {
         cb(null, null);
       } else {
-        console.log(result, 'db 73 login result')
         cb(err, result.rows[0].password_hash, result.rows[0].id);
       }
     }
@@ -78,7 +84,9 @@ const login = (username, cb) => {
 }
 
 const selectAll = (userId, callback) => {
-  client.query('SELECT * FROM bookmarks WHERE user_id = $1', [userId], (err, results, fields) => {
+  const statement = 'SELECT * FROM bookmarks WHERE user_id = $1';
+  const args = [userId];
+  client.query(statement, args, (err, results, fields) => {
     if (err) {
       callback(err, null);
     } else {
@@ -91,9 +99,9 @@ const selectAll = (userId, callback) => {
   });
 };
 
-const add = (title, tags, category, url, notes, cb) => {
-  const statement = 'INSERT INTO bookmarks (title, tags, category, url, notes) VALUES ($1, $2, $3, $4, $5)';
-  const args = [title, tags, category, url, notes];
+const add = (title, tags, category, url, notes, userId, cb) => {
+  const statement = 'INSERT INTO bookmarks (title, tags, category, url, notes, user_id) VALUES ($1, $2, $3, $4, $5, $6)';
+  const args = [title, tags, category, url, notes, userId];
   client.query(statement, args,
     (err, result) => {
       if (err) {
@@ -104,17 +112,10 @@ const add = (title, tags, category, url, notes, cb) => {
     });
 };
 
-const setImage = (id, img, cb) => {
-  client.query('UPDATE bookmarks SET img=? WHERE id=?', [img, id], cb);
-};
-
-const update = (id, data, cb) => {
-  client.query(
-    `UPDATE bookmarks SET title='${data.title}', tags='${
-    data.tags
-    }', category='${data.category}', url='${data.url}', notes='${
-    data.notes
-    }' WHERE id=${id}`,
+const update = (id, data, userId, cb) => {
+  const statement = 'UPDATE bookmarks SET title=$1, tags=$2, category=$3, url=$4, notes=$5 WHERE id=$6 AND user_id=$7';
+  const args = [data.title, data.tags, data.category, data.url, data.notes, id, userId];
+  client.query(statement, args,
     (err, result) => {
       if (err) {
         cb(err, null);
@@ -126,8 +127,9 @@ const update = (id, data, cb) => {
 };
 
 const deleteBookmark = (id, cb) => {
-  //  client.query(`DELETE FROM bookmarks WHERE id=` + id, (err, result) => {
-  client.query(`DELETE FROM bookmarks WHERE id= ` + id, (err, result) => {
+  const statement = 'DELETE FROM bookmarks WHERE id=$1';
+  const args = [id];
+  client.query(statement, args, (err, result) => {
     if (err) {
       cb(err, null);
     } else {
@@ -144,7 +146,6 @@ module.exports = {
   login,
   selectAll,
   add,
-  setImage,
   deleteBookmark,
   update,
 };

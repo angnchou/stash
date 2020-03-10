@@ -80,7 +80,6 @@ app.get('/stashgoogleauth', function (req, res) {
                 res.status(500).send('db problem');
               } else {
                 const oauthCookie = jwt.sign({ email: payload.email, userId: data.rows[0].id }, loginSecret);
-                // console.log(oauthCookie, 'cookie')
                 res.cookie('auth', oauthCookie);
                 res.redirect('/');
               }
@@ -348,14 +347,15 @@ app.use(function (req, res, next) {
 })
 
 app.get('/', function (req, res) {
-  res.render('index');
+  const checkAuthCookie = jwt.verify(req.cookies.auth, loginSecret);
+  const email = checkAuthCookie.email;
+  res.render('index', { email: email });
 })
 
 
 app.get('/items', function (req, res) {
   const checkAuthCookie = jwt.verify(req.cookies.auth, loginSecret);
   const userId = checkAuthCookie.userId;
-
   db.selectAll(userId, (err, data) => {
     if (err) {
       res.status(500).send(err);
@@ -365,16 +365,18 @@ app.get('/items', function (req, res) {
   });
 });
 app.post('/items/api', function (req, res) {
+  const checkAuthCookie = jwt.verify(req.cookies.auth, loginSecret);
+  const userId = checkAuthCookie.userId;
   diffApi
     .getInfo(req.body.url)
     .then(info => {
-      console.log(info, 'DIFFFAPI')
       db.add(
         info.title,
         req.body.tags,
         req.body.category,
         req.body.url,
         req.body.notes,
+        userId,
         (err, newId) => {
           if (err) {
             res.status(500).send(err);
@@ -413,7 +415,9 @@ app.post('/items', function (req, res) {
 });
 
 app.patch('/items/:id', (req, res) => {
-  db.update(req.params.id, req.body, (err, data) => {
+  const checkAuthCookie = jwt.verify(req.cookies.auth, loginSecret);
+  const userId = checkAuthCookie.userId;
+  db.update(req.params.id, req.body, userId, (err, data) => {
     if (err) {
       res.status(500).send(err);
     } else {

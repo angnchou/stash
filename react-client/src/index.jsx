@@ -191,7 +191,7 @@ class App extends React.Component {
           notes={this.state.notes}
           tags={this.state.tags}
         />
-        <h1>Stash</h1>
+        <div><h1>Stash</h1><div></div></div>
         <Dropdown
           items={this.state.items}
           currentCat={this.state.currentCategory}
