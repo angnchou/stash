@@ -1,0 +1,31 @@
+doctype html
+
+head  
+  title Stash Login Pug
+  link(rel="stylesheet" type="text/css" href="/style.css")
+  script(src="https://apis.google.com/js/platform.js")
+  script(src="https://apis.google.com/js/client:platform.js?onload=start")
+
+body  
+  h2="Login to See Your Stash"
+  div(class="oAuth")
+    p
+      | We found an account for
+      span(class="oAuthLogin")=email 
+      |.
+      | Enter your login information to sign in with Google next time.
+  div(id="login")
+    form(method="post")
+      input(type="text" placeholder="email" name="email" value=email)
+      input(type="password" placeholder="password" name="password")
+      input(type="submit" name="submit")
+      div
+        input(type="checkbox" id="remember-me" name="rememberMe")
+        label(for="remember-me" class="checkbox-label")="Remember me"      
+  
+  div(class="loginbottom")
+    
+    div(id="createaccont" class="login")
+      a(href="/createaccount")="Create account"
+    div(id="resetPassword" class="login")
+      a(href="/resetpassword")="Forgot your password?"

@@ -43,13 +43,25 @@ const createAccount = (username, hashedPassword, cb) => {
 }
 
 const getUserId = (username, cb) => {
-  const statement = 'SELECT id from users WHERE username = $1';
+  const statement = 'SELECT * from users WHERE username = $1';
   const args = [username]
   client.query(statement, args, (err, userId) => {
     if (err) {
       cb(err, null);
     } else {
       cb(null, userId)
+    }
+  })
+}
+
+const enableOauth = (userId, cb) => {
+  const statement = 'UPDATE users SET google_auth = true WHERE id = $1';
+  const args = [userId];
+  client.query(statement, args, (err, result) => {
+    if (err) {
+      cb(err, null);
+    } else {
+      cb(null, result);
     }
   })
 }
@@ -148,4 +160,5 @@ module.exports = {
   add,
   deleteBookmark,
   update,
+  enableOauth
 };

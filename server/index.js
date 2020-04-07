@@ -74,14 +74,16 @@ app.get('/stashgoogleauth', function (req, res) {
       })
         .then(({ payload }) => {
           if (payload.email_verified && payload.email) {
-            // query DB to get userID assuming email belongs to a user who has enabled oauth
             db.getUserId(payload.email, (err, data) => {
               if (err) {
                 res.status(500).send('db problem');
-              } else {
+                // query DB to get userID assuming email belongs to a user who has enabled oauth
+              } else if (data.rows[0].google_auth) {
                 const oauthCookie = jwt.sign({ email: payload.email, userId: data.rows[0].id }, loginSecret);
                 res.cookie('auth', oauthCookie);
                 res.redirect('/');
+              } else {
+                res.redirect(`/oAuthLogin?email=${payload.email}`);
               }
             })
           }
@@ -118,6 +120,10 @@ app.get('/login', function (req, res) {
   } else {
     res.render('login', { email: user });
   }
+})
+
+app.get('/oAuthLogin', function (req, res) {
+  res.render('oAuthLogin', { email: req.query.email });
 })
 
 app.post('/createaccount', function (req, res) {
@@ -226,6 +232,45 @@ app.post('/login', function (req, res) {
     }
   });
 });
+
+app.post('/oAuthLogin', function (req, res) {
+  const pw = req.body.password;
+  const user = req.body.email;
+
+  if (!pw || !user) {
+    req.session.err = 'Email and password are required!';
+    res.redirect('/login');
+    return;
+  }
+  const checkHash = sha256.hmac(loginSecret, pw);
+  db.login(user, (err, hashedPw, userId) => {
+    if (err) {
+      res.status(500).send('db problem :(');
+    } else if (userId === null) {
+      req.session.err = 'User not found!';
+      res.redirect('/login');
+    } else if (checkHash === hashedPw) {
+      if (req.body.rememberMe === 'on') {
+        res.cookie('email', req.body.email);
+      }
+      // const checkAuth = sha256.hmac(loginSecret, req.body.username);
+      const jwtAuth = jwt.sign({ email: user, userId: userId }, loginSecret);
+      res.cookie('auth', jwtAuth);
+      db.enableOauth(userId, (err, result) => {
+        if (err) {
+          res.status(500).send('Error enabling Google Auth');
+        } else {
+          res.redirect('/');
+        }
+      })
+    } else {
+      req.session.err = 'Incorrect password, try again!';
+      res.redirect('/login');
+    }
+  });
+});
+
+
 
 app.get('/resetpassword', function (req, res) {
   res.render('resetPassword.pug', { message: req.session.message });

@@ -162,3 +162,13 @@ input {
   justify-content: flex-end;
   font-weight: bold;
 }
+
+.oAuthLogin {
+  color:#484848;
+  font-weight: bold;
+  margin: 0px 3px 0px 3px;
+}
+.oAuth {
+  display: flex;
+  flex-direction: row ;
+}
