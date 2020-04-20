@@ -1,4 +1,5 @@
 import React from 'react';
+import Share from './Share.jsx';
 
 const ListItem = props => {
   if (props.item.img) {
@@ -18,14 +19,20 @@ const ListItem = props => {
           <div className="tags" id="tags">
             {props.item.tags}
           </div>
-          <img
-            id="edit"
-            src="https://image.flaticon.com/icons/png/512/23/23187.png"
-            onClick={() => {
-              console.log(props.item);
-              props.handleEdit(props.item);
-            }}
-          />
+          <div className="bookmarkToolbar">
+            <img
+              id="edit"
+              src="https://image.flaticon.com/icons/png/512/23/23187.png"
+              onClick={() => {
+                console.log(props.item);
+                props.handleEdit(props.item);
+              }}
+            />
+            <Share
+              handleShare={props.handleShare}
+
+            />
+          </div>
         </div>
       </div>
     </div>

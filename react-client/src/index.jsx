@@ -18,6 +18,8 @@ class App extends React.Component {
       tags: '',
       selectedId: null,
       currentCategory: 'Show All',
+      shareModalIsOpen: false,
+      sharedWithEmail: ''
     };
     this.openModal = this.openModal.bind(this);
     this.afterOpenModal = this.afterOpenModal.bind(this);
@@ -30,6 +32,7 @@ class App extends React.Component {
     this.saveOrUpdate = this.saveOrUpdate.bind(this);
     this.selectCategory = this.selectCategory.bind(this);
     this.logOut = this.logOut.bind(this);
+    this.handleShare = this.handleShare(this);
   }
 
   logOut() {
@@ -163,6 +166,13 @@ class App extends React.Component {
     }
   }
 
+  handleShare(email, bookmark) {
+    this.setState({
+      sharedWithEmail: email,
+      url: bookmark.url
+    })
+  }
+
   render() {
     return (
       <div>
@@ -201,6 +211,7 @@ class App extends React.Component {
           items={this.state.items}
           handleEdit={this.handleEdit}
           currentCategory={this.state.currentCategory}
+          handleShare={this.handleShare}
         />
 
       </div>

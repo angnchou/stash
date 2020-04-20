@@ -168,7 +168,14 @@ input {
   font-weight: bold;
   margin: 0px 3px 0px 3px;
 }
+
 .oAuth {
   display: flex;
   flex-direction: row ;
+}
+
+#share {
+  max-width: 16px;
+  max-height: 16px;
+  margin: 8px
 }

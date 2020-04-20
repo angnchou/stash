@@ -7,7 +7,7 @@ export default function Category(props) {
     <div id="category">
       <h4>{props.name || 'Uncategorized'}</h4>
       {props.items.map(item => (
-        <ListItem key={item.id} item={item} handleEdit={props.handleEdit} />
+        <ListItem key={item.id} item={item} handleEdit={props.handleEdit} handleShare={props.handleShare} />
       ))}
     </div>
   );

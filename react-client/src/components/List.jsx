@@ -30,6 +30,7 @@ const List = props => {
             name={category}
             items={groupedByCategory[category]}
             handleEdit={props.handleEdit}
+            handleShare={props.handleShare}
           />
         ))}
     </div>

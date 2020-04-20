@@ -117,6 +117,7 @@ const add = (title, tags, category, url, notes, userId, cb) => {
   client.query(statement, args,
     (err, result) => {
       if (err) {
+        console.log(err, 'DB 120')
         cb(err, null);
       } else {
         cb(null, result.insertId);
