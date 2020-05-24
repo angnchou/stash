@@ -24,13 +24,17 @@ const ListItem = props => {
               id="edit"
               src="https://image.flaticon.com/icons/png/512/23/23187.png"
               onClick={() => {
-                console.log(props.item);
                 props.handleEdit(props.item);
               }}
             />
-            <Share
-              handleShare={props.handleShare}
 
+            <img
+              id="share"
+              src="https://cdn0.iconfinder.com/data/icons/feather/96/591236-share-512.png"
+              onClick={() => {
+                console.log(props.item.url, 'URL')
+                props.handleShare(props.item.url);
+              }}
             />
           </div>
         </div>

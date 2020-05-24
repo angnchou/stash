@@ -4,6 +4,7 @@ import $ from 'jquery';
 import List from './components/List.jsx';
 import BookmarkModal from './components/BookmarkModal.jsx';
 import Dropdown from './components/Dropdown.jsx';
+import Share from './components/Share.jsx';
 
 class App extends React.Component {
   constructor(props) {
@@ -32,7 +33,7 @@ class App extends React.Component {
     this.saveOrUpdate = this.saveOrUpdate.bind(this);
     this.selectCategory = this.selectCategory.bind(this);
     this.logOut = this.logOut.bind(this);
-    this.handleShare = this.handleShare(this);
+    this.handleShare = this.handleShare.bind(this);
   }
 
   logOut() {
@@ -166,10 +167,10 @@ class App extends React.Component {
     }
   }
 
-  handleShare(email, bookmark) {
+  handleShare(url) {
     this.setState({
-      sharedWithEmail: email,
-      url: bookmark.url
+      modalIsOpen: true,
+      url: url
     })
   }
 
@@ -212,6 +213,13 @@ class App extends React.Component {
           handleEdit={this.handleEdit}
           currentCategory={this.state.currentCategory}
           handleShare={this.handleShare}
+        />
+        <Share
+          modalIsOpen={this.state.modalIsOpen}
+          onAfterOpen={this.afterOpenModal}
+          closeModal={this.closeModal}
+          handleShare={this.handleShare}
+          url={this.state.url}
         />
 
       </div>

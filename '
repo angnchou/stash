@@ -1,0 +1,17 @@
+import shareModal from 'react-modal';
+
+const Share = props => {
+  return (
+
+    <div>
+      <shareModal>
+        <img id="share" src="https://cdn0.iconfinder.com/data/icons/feather/96/591236-share-512.png" />
+
+
+      </shareModal>
+    </div>
+  )
+}
+
+
+export default Share;
